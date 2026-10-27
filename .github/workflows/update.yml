@@ -15,6 +15,7 @@ on:
     paths:
       - "nba/**.py"
       - "data/model.json"
+      - "site/**"
       - ".github/workflows/update.yml"
   schedule:                 # October-June (UTC; ET = UTC-4 until early November, then UTC-5). 8 runs a day:
                             # morning (last night's results and box scores), midday, before tip, and the evening
@@ -71,6 +72,7 @@ jobs:
           CUR=$(python -c "import json; print('nba_' + json.load(open('reports/days.json'))['current'] + '.html')" 2>/dev/null || true)
           if [ -n "$CUR" ] && [ -f "reports/$CUR" ]; then cp "reports/$CUR" _site/index.html
           else echo '<!doctype html><meta charset="utf-8"><title>NBA card</title><p>No card yet.</p>' > _site/index.html; fi
+          mkdir -p _site/assets && cp site/assets/* _site/assets/   # Off The Glass logo, icons, link-preview image
           touch _site/.nojekyll
 
       - name: Save the card, lines and plays to the repo

@@ -14,6 +14,27 @@ import pandas as pd
 
 REPO = "barrca12-rgb/NBA"
 SITE = "https://barrca12-rgb.github.io/"
+SITE_URL = SITE + "NBA/"
+X_HANDLE = "OffTheGlassHQ"
+# Off The Glass brand, same as the CBB card (barrca12-rgb/CBB cbb/report_html.py HEAD and BRAND); site/assets is
+# copied into the site by the workflow
+HEAD = f"""<meta name="description" content="Off The Glass: an NBA betting model. Every play logged at the posted number, graded in public.">
+<meta name="theme-color" content="#0A2C49">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:site_name" content="Off The Glass">
+<meta property="og:type" content="website">
+<meta property="og:image" content="{SITE_URL}assets/otg-social.jpg">
+<meta property="og:description" content="NBA model: every play logged at the posted number, graded in public.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@{X_HANDLE}">
+<meta name="twitter:image" content="{SITE_URL}assets/otg-social.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700;800&display=swap">"""
+BRAND = ('<a class="brand" href="./" aria-label="Off The Glass home"><img src="assets/otg-logo-512.png" alt="" width="34" height="34">'
+         '<span class="wordmark">Off The Glass</span></a>')
 
 
 def _clean(v):
@@ -46,8 +67,9 @@ def build(games: list[dict], rt: pd.DataFrame, names: dict, day: pd.Timestamp, s
             "games": [_clean(g) for g in games], "ratings": rat, "record": _clean(record) if record else None,
             "usage": sgo_usage or {}}
     payload = json.dumps(data).replace("</", "<\\/")
-    title = f"{day:%a %b} {day.day} NBA Card"
-    return TEMPLATE.replace("__TITLE__", html.escape(title)).replace("__DATA__", payload)
+    title = f"Off The Glass · NBA · {day:%a %b} {day.day}"
+    return (TEMPLATE.replace("__HEAD__", HEAD).replace("__BRAND__", BRAND).replace("__X__", X_HANDLE)
+            .replace("__TITLE__", html.escape(title)).replace("__DATA__", payload))
 
 
 TEMPLATE = r"""<!doctype html>
@@ -55,22 +77,24 @@ TEMPLATE = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__TITLE__</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<meta property="og:title" content="__TITLE__">
+__HEAD__
 <style>
 :root {
-  --bg: #f6f7f9; --surface: #ffffff; --sunken: #f1f3f6; --line: #e3e6eb; --line-strong: #cfd4db;
-  --text: #101418; --muted: #5d6673; --faint: #8b93a0;
-  --accent: #1f5eff; --pos: #0f7b4b; --pos-bg: #e6f4ed; --neg: #c2352b; --warn: #8a5a00; --warn-bg: #fbf1dc;
+  --bg: #fbf6ea; --surface: #ffffff; --sunken: #f7f0e1; --line: #ebe1cd; --line-strong: #d9cbb0;
+  --text: #0a2c49; --muted: #56627a; --faint: #8a93a3;
+  --accent: #b84a08; --pos: #0f7b4b; --pos-bg: #e6f4ed; --neg: #c2352b; --warn: #8a5a00; --warn-bg: #fbf0d9;
+  --brand: #fd6c0f; --bar: #0a2c49; --bar-text: #fbf6ea; --bar-muted: #b7c3d3;
   --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: "Graduate", "Rockwell", Georgia, serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d0f12; --surface: #15181d; --sunken: #1b1f25; --line: #262b33; --line-strong: #353b45;
-    --text: #e8eaed; --muted: #9aa2ae; --faint: #6c7481;
-    --accent: #6b9bff; --pos: #3ccf8e; --pos-bg: #12301f; --neg: #ff6b5e; --warn: #f0b44a; --warn-bg: #33270f;
+    --bg: #08090b; --surface: #12151a; --sunken: #181c22; --line: #242a33; --line-strong: #333b46;
+    --text: #f6eedd; --muted: #a8b0bc; --faint: #6f7886;
+    --accent: #ff8a3d; --pos: #3ccf8e; --pos-bg: #12301f; --neg: #ff6b5e; --warn: #f0b44a; --warn-bg: #33270f;
+    --brand: #fd6c0f; --bar: #000000; --bar-text: #f6eedd; --bar-muted: #9aa2ae;
     color-scheme: dark;
   }
 }
@@ -78,43 +102,53 @@ TEMPLATE = r"""<!doctype html>
 .show-sm { display: none }
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased }
 a { color: var(--accent); text-decoration: none } a:hover { text-decoration: underline }
-.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px }
 
 /* Top bar */
-.top { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5 }
-.top .wrap { display: flex; align-items: center; gap: 20px; height: 52px }
-.brand { font-weight: 700; letter-spacing: -.01em; font-size: 15px; white-space: nowrap }
+.top { background: var(--bar); border-bottom: 3px solid var(--brand); position: sticky; top: 0; z-index: 5 }
+.top .wrap { display: flex; align-items: center; gap: 22px; height: 58px }
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; color: var(--bar-text); text-decoration: none }
+.brand:hover { text-decoration: none }
+.brand img { width: 34px; height: 34px; border-radius: 7px; display: block }
+.wordmark { font-family: var(--display); font-size: 19px; letter-spacing: .02em; text-transform: uppercase; color: var(--bar-text); line-height: 1 }
 .tabs { display: flex; gap: 2px; height: 100% }
-.tabs a { display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; text-decoration: none }
-.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--text) }
-.status { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; min-width: 0 }
+.tabs a { display: flex; align-items: center; padding: 0 12px; color: var(--bar-muted); font-weight: 600; font-size: 13px; letter-spacing: .04em;
+  text-transform: uppercase; border-bottom: 3px solid transparent; margin-bottom: -3px; text-decoration: none }
+.tabs a[hidden] { display: none }
+.tabs a:hover { color: var(--bar-text); text-decoration: none }
+.tabs a[aria-current="page"] { color: var(--bar-text); border-bottom-color: var(--brand) }
+.status { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--bar-muted); font-size: 13px; min-width: 0 }
+.status a { color: var(--bar-text) }
+#upd-btn { background: transparent; color: var(--bar-text); border-color: rgba(251,246,234,.35) } #upd-btn:hover { background: rgba(251,246,234,.1) }
 .status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 button { font: inherit; font-weight: 600; font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: 6px; padding: 6px 12px; cursor: pointer } button:hover { background: var(--sunken) } button:disabled { opacity: .5; cursor: progress }
 
 /* Page head */
 .head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 24px 0 16px }
-h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin: 0 }
+h1 { font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: .01em; margin: 0; line-height: 1.15 }
 .sub { color: var(--muted); margin-top: 2px }
 .days { display: flex; gap: 4px; flex-wrap: wrap }
-.days a { padding: 5px 10px; border-radius: 6px; color: var(--muted); font-weight: 500; font-size: 13px; text-decoration: none; border: 1px solid transparent }
-.days a:hover { background: var(--sunken) }
-.days a[aria-current="page"] { color: var(--text); border-color: var(--line-strong); background: var(--surface) }
+.days a, .pagebtn { padding: 5px 12px; border-radius: 6px; color: var(--text); font-weight: 600; font-size: 13px; text-decoration: none;
+  border: 1px solid var(--line-strong); background: var(--surface); white-space: nowrap }
+.days a:hover, .pagebtn:hover { background: var(--sunken); text-decoration: none }
+.days a[aria-current="page"] { color: var(--surface); border-color: var(--text); background: var(--text) }
 .notice { border: 1px solid var(--line); background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 13px }
 
 /* KPI strip */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-bottom: 24px; overflow: hidden }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-top: 3px solid var(--text); border-radius: 10px; background: var(--surface); margin-bottom: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,44,73,.06) }
 .kpi { padding: 12px 16px; border-right: 1px solid var(--line) } .kpi:last-child { border-right: 0 }
-.kpi .k { color: var(--muted); font-size: 12px; font-weight: 500 } .kpi .v { font-size: 18px; font-weight: 600; margin-top: 2px; letter-spacing: -.01em }
+.kpi .k { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em } .kpi .v { font-size: 21px; font-weight: 800; margin-top: 3px; letter-spacing: -.01em }
 .kpi .v small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 4px }
 
 /* Panels and tables */
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 24px; overflow: hidden }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,44,73,.06) }
 .panel-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line) }
-.panel-h h2 { font-size: 15px; font-weight: 600; margin: 0 } .panel-h .note { color: var(--muted); font-size: 12px }
+.panel-h h2 { font-size: 13px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: .07em; display: flex; align-items: center; gap: 8px }
+.panel-h h2::before { content: ""; width: 4px; height: 14px; background: var(--brand); border-radius: 2px } .panel-h .note { color: var(--muted); font-size: 12px }
 .scroll { overflow-x: auto }
 table { width: 100%; border-collapse: collapse; font-size: 13px }
-th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--sunken); white-space: nowrap }
+th { text-align: left; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--sunken); white-space: nowrap }
 td { padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: middle }
 tbody tr:last-child td { border-bottom: 0 }
 .r { text-align: right } .c { text-align: center } .m { color: var(--muted) } .f { color: var(--faint) }
@@ -123,7 +157,7 @@ tbody tr:last-child td { border-bottom: 0 }
 .betlink { font-weight: 600; font-size: 12px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 10px; color: var(--text); display: inline-block }
 .betlink:hover { background: var(--sunken); text-decoration: none }
 .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--muted) }
-.tag.bet { color: var(--pos); border-color: var(--pos); background: var(--pos-bg) }
+.tag.bet { color: #fff; border-color: var(--brand); background: var(--brand) }
 
 /* Segmented control */
 .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 6px; overflow: hidden }
@@ -141,40 +175,66 @@ label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--mu
 .board .team { font-weight: 500 }
 .inj { color: var(--warn); font-size: 11px; font-weight: 500; white-space: normal; max-width: 340px; margin-top: 1px } .board .tm { width: 72px; color: var(--muted); font-size: 12px }
 .board .pts { color: var(--muted); width: 40px }
-.odd { display: inline-flex; flex-direction: column; align-items: flex-end; min-width: 64px; padding: 3px 8px; border-radius: 6px; line-height: 1.25; color: var(--text); text-decoration: none }
+.odd { display: inline-flex; flex-direction: column; align-items: flex-end; min-width: 56px; padding: 3px 6px; border-radius: 6px; line-height: 1.25; color: var(--text); text-decoration: none }
 .odd small { color: var(--faint); font-size: 11px }
 a.odd:hover { background: var(--sunken); text-decoration: none }
 .odd.best { background: var(--pos-bg); color: var(--pos) } .odd.best small { color: var(--pos) }
 .na { color: var(--faint) }
-.board th.bk, .board td.bk { text-align: right; width: 96px }
-.board tbody.g.has-bet { background: linear-gradient(90deg, var(--pos) 0 2px, transparent 2px) }
+.board th.bk, .board td.bk { text-align: right; width: 84px; padding-left: 6px; padding-right: 6px }
+.board td.edge { white-space: normal; min-width: 110px; max-width: 170px } .tag { white-space: normal }
+.bestc { display: none; text-align: right } .tm-sm { display: none; color: var(--faint); font-size: 11px }
+@media (max-width: 1100px) { .bk-minor, .hide-md { display: none } .board .bestc { display: table-cell } }
+.bestc small { display: block; color: var(--faint); font-size: 11px }
+.board tbody.g.has-bet { background: linear-gradient(90deg, var(--brand) 0 3px, transparent 3px) }
 
 details.panel > summary { list-style: none; cursor: pointer; padding: 12px 16px; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between }
 details.panel > summary::after { content: "Show"; color: var(--accent); font-size: 13px; font-weight: 500 }
 details.panel[open] > summary::after { content: "Hide" }
 details.panel[open] > summary { border-bottom: 1px solid var(--line) }
 footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 80ch }
+.follow { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 700; color: var(--text) }
+.follow img { width: 22px; height: 22px; border-radius: 5px }
+.tl img { width: auto; vertical-align: -3px; margin-right: 5px; object-fit: contain }
+.pick .tl img { vertical-align: -5px; margin-right: 6px }
+.hero { display: block; height: 120px; width: auto; max-width: 100%; object-fit: contain; border-radius: 10px; margin-top: 18px; border: 1px solid var(--line) }
+@media (max-width: 720px) { .hero { height: auto; width: 100% } }
 
-@media (max-width: 720px) {
-  .top .wrap { gap: 12px } .status span { display: none }
-  h1 { font-size: 19px }
+@media (max-width: 860px) {
+  .top .wrap { gap: 10px } .status span { display: none }
+  .wordmark { display: none } .tabs a { padding: 0 8px; font-size: 12px }
+  h1 { font-size: 21px }
   .kpi { border-right: 0; border-bottom: 1px solid var(--line) } .kpi:last-child { border-bottom: 0 }
   .hide-sm { display: none } .show-sm { display: inline }
   td, th { padding-left: 10px; padding-right: 10px }
   #t-plays td:first-child, #t-leans td:first-child { white-space: normal; min-width: 150px }
+  .board .bk, .board .pts { display: none } .bestc { display: table-cell }
+  .board .tm { width: 52px; font-size: 11px } .board td.edge { min-width: 0; max-width: 104px }
+  .board td, .board th { padding-left: 6px; padding-right: 6px } .board .team { white-space: normal; min-width: 0 }
+  .board .tag { font-size: 10px; padding: 1px 4px } .board .tl img { width: 14px; height: 14px; margin-right: 4px }
+  .board .tm { display: none } .tm-sm { display: block } .board td.edge { max-width: 104px }
+  table.stack thead { display: none }
+  table.stack tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 12px; border-bottom: 1px solid var(--line) }
+  table.stack tbody tr:last-child { border-bottom: 0 }
+  table.stack td { display: block; border: 0; padding: 0; white-space: normal; text-align: left; min-width: 0 }
+  table.stack td:first-child { grid-column: 1 / -1; min-width: 0 }
+  table.stack td[data-l]::before { content: attr(data-l); display: block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--faint); margin-bottom: 1px }
+  table.stack td:first-child::before { display: none }
+  table.stack td.hide-sm, table.stack td:empty { display: none }
+  table.stack td.empty { grid-column: 1 / -1; text-align: center }
 }
 </style>
 
 <header class="top"><div class="wrap">
-  <a class="brand" href="https://barrca12-rgb.github.io/" style="color:inherit;text-decoration:none">Model Card</a>
-  <nav class="tabs" aria-label="Sport"><a href="https://barrca12-rgb.github.io/NFL/">NFL</a><a href="https://barrca12-rgb.github.io/CBB/"><span class="hide-sm">College Basketball</span><span class="show-sm">CBB</span></a><a href="./" aria-current="page">NBA</a></nav>
+  __BRAND__
+  <nav class="tabs" aria-label="Sport"><a href="https://barrca12-rgb.github.io/NFL/">NFL</a><a href="./" aria-current="page">NBA</a><a href="https://barrca12-rgb.github.io/CBB/"><span class="hide-sm">College Basketball</span><span class="show-sm">CBB</span></a></nav>
   <div class="status"><span id="upd-status"></span><button id="upd-btn" type="button">Update</button></div>
 </div></header>
 
 <main class="wrap">
   <div class="head">
     <div><h1 id="h1"></h1><div class="sub" id="sub"></div></div>
-    <nav class="days" id="days" aria-label="Days"></nav>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><nav class="days" id="days" aria-label="Days"></nav><a class="pagebtn" id="rec-btn" href="#rec-sec" hidden>Record</a></div>
   </div>
 
   <div class="notice" id="stale" hidden>Live lines unavailable on the last update (SportsGameOdds). Lines shown are the last ones stored; no new plays were logged.</div>
@@ -215,11 +275,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   <details class="panel"><summary>Power ratings</summary><div class="scroll"><table id="t-rat"></table></div></details>
 
   <footer>
-    Projections combine opponent-adjusted efficiency and pace ratings from every NBA box score this season with LUMA ARC
-    player ratings for who played in each team's last game (lumahoops.org), rest, back-to-backs, travel, altitude, home court,
-    late-season and playoff scoring, and an in-season bias check. The line is never an input. In a 2023-24 to 2025-26 backtest,
-    totals at 4+ points won 58.8% against opening lines (1,130 plays) and the model broke even against closing lines, so the
-    value is in betting early. Spreads reached about 55% and are tracked only. <a id="bt-link" href="#">Research log</a>.
+    <div><a class="follow" href="https://x.com/__X__" target="_blank" rel="noopener"><img src="assets/otg-logo-512.png" alt="">Follow @__X__ on X for every play</a></div>
   </footer>
 </main>
 
@@ -237,11 +293,16 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const playAt = (v, higherBetter) => v == null ? null : (higherBetter ? Math.ceil(v * 2 - 1e-9) : Math.floor(v * 2 + 1e-9)) / 2;
   const day = new Date(D.date + "T12:00:00");
   const tip = (g) => g.start ? new Date(g.start).toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit", timeZone: "America/New_York"}) : "";
-  const matchup = (g) => g.away + (g.neutral ? " vs " : " @ ") + g.home;
+  const stack = (id) => { const t = $(id); if (!t) return; const hs = [...t.querySelectorAll("thead th")].map((h) => h.textContent.trim());
+    t.classList.add("stack"); t.querySelectorAll("tbody tr").forEach((r) => [...r.children].forEach((c, k) => { if (hs[k]) c.dataset.l = hs[k]; })); };
+  // ESPN logos by team abbreviation; a logo that fails to load is removed
+  const logo = (ab, px) => !ab ? "" : "<picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/" +
+    esc(String(ab).toLowerCase()) + ".png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/" + esc(String(ab).toLowerCase()) + ".png' alt='' loading='lazy' width='" + px +
+    "' height='" + px + "' onerror=\"this.closest('picture').remove()\"></picture>";
+  const matchupL = (g) => logo(g.away, 14) + esc(g.away) + (g.neutral ? " vs " : " @ ") + logo(g.home, 14) + esc(g.home);
   const BOOKS = ["FanDuel", "DraftKings", "BetMGM", "Caesars", "Fanatics", "bet365", "theScore Bet"];
   const bl = (g, bk) => (g.book_lines || []).find((x) => x.book === bk);
 
-  $("bt-link").href = "https://github.com/" + D.repo + "/blob/HEAD/research/LOG.md";
   $("h1").textContent = day.toLocaleDateString("en-US", {weekday: "long", month: "long", day: "numeric"});
   const withLines = D.games.filter((g) => g.n_books > 0).length;
   $("sub").textContent = D.games.length + " games · " + withLines + " with lines · " + (D.season - 1) + "–" + String(D.season).slice(2) + " season";
@@ -262,20 +323,19 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const rest = (g) => "Rest " + (g.away_rest == null ? "–" : Math.min(g.away_rest, 7) + "d") + " / " + (g.home_rest == null ? "–" : Math.min(g.home_rest, 7) + "d");
   const missing = (g) => ["away", "home"].map((sd) => { const u = g[sd + "_usual_net"], a = g[sd + "_avail_net"];
     return u != null && a != null && u - a > 1 ? g[sd] + " short-handed in last game (" + sgn(a - u) + " ARC)" : ""; }).filter(Boolean).join(" · ");
-  $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm'>Opened</th><th class='r hide-sm'>Units</th><th></th></tr></thead><tbody>" +
-    P.map((p) => "<tr><td><div class='b'>" + esc(p.bet) + "</div><div class='f' style='font-size:12px'>" + esc(matchup(p.g)) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
+  $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm'>Opened</th><th class='r hide-sm'>Units</th></tr></thead><tbody>" +
+    P.map((p) => "<tr><td><div class='b pick'>" + esc(p.bet) + "</div><div class='f' style='font-size:12px'>" + matchupL(p.g) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
       (missing(p.g) ? "<div class='inj'>" + esc(missing(p.g)) + "</div>" : "") +
       (p.g.total_warn ? "<div class='inj'>&#9888; " + esc(p.g.total_warn) + "</div>" : "") + "</td><td>" +
       esc(p.book || "–") + (p.price != null ? " <span class='m'>" + esc(odds(p.price)) + "</span>" : "") + "</td><td class='r m hide-sm'>" + esc(p.model) + "</td><td class='r pos b'>" + sgn(p.edge) +
       "</td><td class='r m hide-sm'>" + pct(p.p) + "</td><td class='r'>" + (p.ev == null ? "–" : sgn(100 * p.ev) + "%") +
-      "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm'>" + num(p.units, 2) + "</td><td class='r'>" +
-      (p.link ? "<a class='betlink' href='" + esc(p.link) + "' target='_blank' rel='noopener'>Bet</a>" : "") + "</td></tr>").join("") + "</tbody>"
+      "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm'>" + num(p.units, 2) + "</td></tr>").join("") + "</tbody>"
     : "<tbody><tr><td class='empty'>" + (withLines ? "No plays. No total is far enough from the model." : "No lines posted yet. Openers usually post the night before.") + "</td></tr></tbody>";
 
   const Lz = D.games.filter((g) => g.spread_verdict === "LEAN");
   if (!Lz.length) $("leans-sec").hidden = true;
   else $("t-leans").innerHTML = "<thead><tr><th>Lean</th><th>Best number</th><th class='r'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Opened</th></tr></thead><tbody>" +
-    Lz.map((g) => "<tr><td><div class='b'>" + esc(g.spread_pick + " " + ln(g.spread_line)) + "</div><div class='f' style='font-size:12px'>" + esc(matchup(g)) + " · " + esc(tip(g)) + "</div></td><td>" +
+    Lz.map((g) => "<tr><td><div class='b pick'>" + logo(g[g.spread_side], 20) + esc(g.spread_pick + " " + ln(g.spread_line)) + "</div><div class='f' style='font-size:12px'>" + matchupL(g) + " · " + esc(tip(g)) + "</div></td><td>" +
       esc(g.spread_book) + (g.spread_odds != null ? " <span class='m'>" + esc(odds(g.spread_odds)) + "</span>" : "") + "</td><td class='r m'>" +
       ln(g.spread_side === "home" ? g.model_home_spread : -g.model_home_spread) + "</td><td class='r b'>" + sgn(g.spread_edge) + "</td><td class='r m hide-sm'>" +
       (g.open_home_spread == null ? "–" : ln(g.spread_side === "home" ? g.open_home_spread : -g.open_home_spread)) + "</td></tr>").join("") + "</tbody>";
@@ -296,14 +356,28 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const cell = (val, price, link, best) => val == null ? "<span class='na'>–</span>" :
     "<" + (link ? "a href='" + esc(link) + "' target='_blank' rel='noopener'" : "span") + " class='odd" + (best ? " best" : "") + "'>" + esc(val) +
     (price != null ? "<small>" + esc(odds(price)) + "</small>" : "") + "</" + (link ? "a" : "span") + ">";
+  // best number (then price) across books for one side, for the phone layout's single column
+  const best = (g, sd, i) => {
+    const pay = (o) => o == null ? -1 : (o > 0 ? o / 100 : 100 / -o);
+    let top = null;
+    for (const x of (g.book_lines || [])) {
+      let v, pr, txt;
+      if (market === "spread") { if (x.home_spread == null) continue; v = sd === "home" ? x.home_spread : -x.home_spread; pr = x[sd + "_spread_odds"]; txt = ln(v); }
+      else if (market === "total") { if (x.total == null) continue; const ou = i === 0 ? "over" : "under"; v = ou === "over" ? -x.total : x.total; pr = x[ou + "_odds"]; txt = ou[0] + num(x.total); }
+      else { pr = x[sd + "_ml"]; if (pr == null) continue; v = pay(pr); txt = odds(pr); }
+      const key = [v, pay(pr)];
+      if (!top || key[0] > top.key[0] || (key[0] === top.key[0] && key[1] > top.key[1])) top = {key, txt, pr, book: x.book};
+    }
+    return top ? esc(top.txt) + (market !== "ml" && top.pr != null ? " <span class='m'>" + esc(odds(top.pr)) + "</span>" : "") + "<small>" + esc(top.book) + "</small>" : "<span class='na'>–</span>";
+  };
   const board = () => {
     const only = $("only-plays").checked;
     const G = D.games.filter((g) => !only || g.total_verdict === "BET")
       .sort((a, b) => String(a.start).localeCompare(String(b.start)) || a.home.localeCompare(b.home));
     const mh = {spread: "Model", total: "Model", ml: "Win %"}[market];
-    let h = "<thead><tr><th>Time</th><th>Team</th><th class='r'>Proj</th><th class='r'>" + mh + "</th><th class='r hide-sm'>Open</th>" +
-      BOOKS.map((b) => "<th class='bk'>" + b + "</th>").join("") + "<th class='r'>Edge</th></tr></thead>";
-    if (!G.length) { $("t-board").innerHTML = h + "<tbody><tr><td class='empty' colspan='" + (BOOKS.length + 6) + "'>No games.</td></tr></tbody>"; return; }
+    let h = "<thead><tr><th class='tm'>Time</th><th>Team</th><th class='r pts'>Proj</th><th class='r'>" + mh + "</th><th class='r hide-sm hide-md'>Open</th>" +
+      BOOKS.map((b, j) => "<th class='bk" + (j >= 4 ? " bk-minor" : "") + "'>" + b + "</th>").join("") + "<th class='bestc'>Best</th><th class='r edge'>Edge</th></tr></thead>";
+    if (!G.length) { $("t-board").innerHTML = h + "<tbody><tr><td class='empty' colspan='" + (BOOKS.length + 7) + "'>No games.</td></tr></tbody>"; return; }
     h += G.map((g) => {
       const hasBet = market === "total" && g.total_verdict === "BET";
       const rows = ["away", "home"].map((sd, i) => {
@@ -334,8 +408,9 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
           bookCells = BOOKS.map((bk, j) => { const x = bl(g, bk); return x && x[sd + "_ml"] != null ? cell(odds(x[sd + "_ml"]), null, x[sd + "_ml_link"], prices[j] === top && ok.length > 1) : cell(null); });
         }
         return "<tr>" + (i === 0 ? "<td class='tm' rowspan='2'>" + esc(tip(g)) + "</td>" : "") +
-          "<td class='team'>" + (i === 1 && !g.neutral ? "<span class='f'>@ </span>" : "") + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td><td class='r m hide-sm'>" + open + "</td>" +
-          bookCells.map((c) => "<td class='bk'>" + c + "</td>").join("") + "<td class='r'>" + edge + "</td></tr>";
+          "<td class='team'>" + (i === 0 ? "<div class='tm-sm'>" + esc(tip(g)) + "</div>" : "") + (i === 1 && !g.neutral ? "<span class='f'>@ </span>" : "") +
+          logo(g[sd], 18) + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td><td class='r m hide-sm hide-md'>" + open + "</td>" +
+          bookCells.map((c, j) => "<td class='bk" + (j >= 4 ? " bk-minor" : "") + "'>" + c + "</td>").join("") + "<td class='bestc'>" + best(g, sd, i) + "</td><td class='r edge'>" + edge + "</td></tr>";
       }).join("");
       return "<tbody class='g" + (hasBet ? " has-bet" : "") + "'>" + rows + "</tbody>";
     }).join("");
@@ -350,12 +425,12 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const W = D.games.filter((g) => g.total_verdict === "WATCH");
   if (!W.length) $("watch-sec").hidden = true;
   else $("t-watch").innerHTML = "<thead><tr><th>Time</th><th>Game</th><th>Side</th><th class='r'>Now</th><th class='r'>Play at</th><th class='r'>Edge now</th></tr></thead><tbody>" +
-    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + esc(matchup(g)) + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
+    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + matchupL(g) + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
       "</td><td class='r'>" + num(playAt(g.total_good_to, g.total_pick === "Under")) + "</td><td class='r m'>" + sgn(g.total_edge) + "</td></tr>").join("") + "</tbody>";
 
   // Record
   if (st) {
-    $("rec-sec").hidden = false;
+    $("rec-sec").hidden = false; $("rec-btn").hidden = false;
     $("t-rec").innerHTML = "<thead><tr><th>Market</th><th class='r'>Record</th><th class='r'>Win %</th><th class='r'>Units</th><th class='r'>ROI</th><th class='r'>Avg CLV</th><th class='r'>Beat close</th><th class='r'>Open</th></tr></thead><tbody>" +
       Object.entries(st).map(([mk, s]) => "<tr><td>" + mk[0].toUpperCase() + mk.slice(1) + "</td><td class='r'>" + rec(s) + "</td><td class='r'>" + pct(s.win) + "</td><td class='r " +
         (s.units > 0 ? "pos" : s.units < 0 ? "neg" : "") + "'>" + sgn(s.units, 2) + "</td><td class='r'>" + pct(s.roi) + "</td><td class='r'>" + (s.clv_pts == null ? "–" : sgn(s.clv_pts, 2)) +
@@ -364,11 +439,13 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     if (R.length) {
       $("recent-sec").hidden = false;
       $("t-recent").innerHTML = "<thead><tr><th>Date</th><th>Game</th><th>Bet</th><th>Book</th><th class='r'>Close</th><th class='r'>CLV</th><th class='r'>Final</th><th class='r'>Result</th><th class='r'>Units</th></tr></thead><tbody>" +
-        R.map((x) => "<tr><td class='m'>" + esc(x.date) + "</td><td>" + esc(x.away + " @ " + x.home) + "</td><td class='b'>" + esc(x.pick) + (x.kind === "lean" ? " <span class='tag'>Lean</span>" : "") + "</td><td>" + esc(x.book || "–") +
+        R.map((x) => "<tr><td class='m'>" + esc(x.date) + "</td><td>" + logo(x.away, 14) + esc(x.away) + " @ " + logo(x.home, 14) + esc(x.home) + "</td><td class='b'>" + esc(x.pick) + (x.kind === "lean" ? " <span class='tag'>Lean</span>" : "") + "</td><td>" + esc(x.book || "–") +
           "</td><td class='r'>" + num(x.close_line) + "</td><td class='r'>" + sgn(x.clv_pts) + "</td><td class='r m'>" + esc(x.away_score) + "–" + esc(x.home_score) +
           "</td><td class='r b " + (x.result === "W" ? "pos" : x.result === "L" ? "neg" : "") + "'>" + esc(x.result) + "</td><td class='r'>" + sgn(x.profit, 2) + "</td></tr>").join("") + "</tbody>";
     }
   }
+
+  ["t-plays", "t-leans", "t-watch", "t-rec", "t-recent"].forEach(stack);
 
   // Ratings
   $("t-rat").innerHTML = "<thead><tr><th class='r'>#</th><th>Team</th><th class='r'>Net</th><th class='r'>Offense</th><th class='r'>Defense</th><th class='r'>Pace</th></tr></thead><tbody>" +
