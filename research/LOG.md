@@ -370,3 +370,29 @@ Final spec (phase 3 + M2 + M4; `research/out/p4_spec.json`), at the opener:
   phase 2 already carry the availability signal.
 * The model's margin miss (10.93) is still 0.3 points behind the closing line (10.64); the remaining spread edge
   vs the opener is small (about 53-56% at 3+, interval lower bounds near 50% in any one season).
+
+---
+
+## Entry 14 (2026-10-27): live check of the under lean on the Oct 28 card (`research/live/under_check.py`)
+
+All four totals plays so far are unders (LAL/POR 234.5; PHI/IND, WSH/CLE, DEN/NO 239.5). On the 52 completed
+2026-27 games (live model as of each morning; ESPN's stored closes, free feed):
+
+| | points |
+|---|---:|
+| average result | 229.2 |
+| average model total | 228.4 (result minus model +0.8, se 2.5) |
+| average closing total | 232.3 (result minus close -3.2) |
+| model vs close | below the close by 4+ in 23 games, above by 4+ in 0 |
+| those 23 vs the close | 14-9 |
+
+The lean is relative to the market, not to results: so far the market has run about 3 points above what games
+score, and the model about 1 below. 52 games is far too few to call either a bias (se 2.5). It mirrors the
+backtest pattern in reverse: there the model ran over the opener late in the season. Nothing changed; watch it.
+
+Injury news (ESPN injury feed, Oct 27 evening) vs the model's assumption (players from each team's last game):
+* PHI/IND: Haliburton questionable (played last game, so the model counts him; out would lower IND's offense,
+  pointing further under). McConnell, Zubac, Nembhard, Walker out or questionable but already absent last game.
+  Line has moved 239.5 -> 237.5 toward the play.
+* WSH/CLE: Champagnie out (4 minutes last game), Dybantsa questionable (has not played). CLE: none. No effect.
+* DEN/NO: Cameron Johnson doubtful, S. Jones and Diallo out, all absent last game; Poole probable. No effect.
