@@ -2,23 +2,39 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wed Oct 28 NBA Card</title>
+<title>Off The Glass · NBA · Wed Oct 28</title>
+<meta property="og:title" content="Off The Glass · NBA · Wed Oct 28">
+<meta name="description" content="Off The Glass: an NBA betting model. Every play logged at the posted number, graded in public.">
+<meta name="theme-color" content="#0A2C49">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:site_name" content="Off The Glass">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://barrca12-rgb.github.io/NBA/assets/otg-social.jpg">
+<meta property="og:description" content="NBA model: every play logged at the posted number, graded in public.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@OffTheGlassHQ">
+<meta name="twitter:image" content="https://barrca12-rgb.github.io/NBA/assets/otg-social.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
 :root {
-  --bg: #f6f7f9; --surface: #ffffff; --sunken: #f1f3f6; --line: #e3e6eb; --line-strong: #cfd4db;
-  --text: #101418; --muted: #5d6673; --faint: #8b93a0;
-  --accent: #1f5eff; --pos: #0f7b4b; --pos-bg: #e6f4ed; --neg: #c2352b; --warn: #8a5a00; --warn-bg: #fbf1dc;
+  --bg: #fbf6ea; --surface: #ffffff; --sunken: #f7f0e1; --line: #ebe1cd; --line-strong: #d9cbb0;
+  --text: #0a2c49; --muted: #56627a; --faint: #8a93a3;
+  --accent: #b84a08; --pos: #0f7b4b; --pos-bg: #e6f4ed; --neg: #c2352b; --warn: #8a5a00; --warn-bg: #fbf0d9;
+  --brand: #fd6c0f; --bar: #0a2c49; --bar-text: #fbf6ea; --bar-muted: #b7c3d3;
   --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: "Graduate", "Rockwell", Georgia, serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d0f12; --surface: #15181d; --sunken: #1b1f25; --line: #262b33; --line-strong: #353b45;
-    --text: #e8eaed; --muted: #9aa2ae; --faint: #6c7481;
-    --accent: #6b9bff; --pos: #3ccf8e; --pos-bg: #12301f; --neg: #ff6b5e; --warn: #f0b44a; --warn-bg: #33270f;
+    --bg: #08090b; --surface: #12151a; --sunken: #181c22; --line: #242a33; --line-strong: #333b46;
+    --text: #f6eedd; --muted: #a8b0bc; --faint: #6f7886;
+    --accent: #ff8a3d; --pos: #3ccf8e; --pos-bg: #12301f; --neg: #ff6b5e; --warn: #f0b44a; --warn-bg: #33270f;
+    --brand: #fd6c0f; --bar: #000000; --bar-text: #f6eedd; --bar-muted: #9aa2ae;
     color-scheme: dark;
   }
 }
@@ -26,43 +42,53 @@
 .show-sm { display: none }
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased }
 a { color: var(--accent); text-decoration: none } a:hover { text-decoration: underline }
-.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px }
 
 /* Top bar */
-.top { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5 }
-.top .wrap { display: flex; align-items: center; gap: 20px; height: 52px }
-.brand { font-weight: 700; letter-spacing: -.01em; font-size: 15px; white-space: nowrap }
+.top { background: var(--bar); border-bottom: 3px solid var(--brand); position: sticky; top: 0; z-index: 5 }
+.top .wrap { display: flex; align-items: center; gap: 22px; height: 58px }
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; color: var(--bar-text); text-decoration: none }
+.brand:hover { text-decoration: none }
+.brand img { width: 34px; height: 34px; border-radius: 7px; display: block }
+.wordmark { font-family: var(--display); font-size: 19px; letter-spacing: .02em; text-transform: uppercase; color: var(--bar-text); line-height: 1 }
 .tabs { display: flex; gap: 2px; height: 100% }
-.tabs a { display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; text-decoration: none }
-.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--text) }
-.status { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; min-width: 0 }
+.tabs a { display: flex; align-items: center; padding: 0 12px; color: var(--bar-muted); font-weight: 600; font-size: 13px; letter-spacing: .04em;
+  text-transform: uppercase; border-bottom: 3px solid transparent; margin-bottom: -3px; text-decoration: none }
+.tabs a[hidden] { display: none }
+.tabs a:hover { color: var(--bar-text); text-decoration: none }
+.tabs a[aria-current="page"] { color: var(--bar-text); border-bottom-color: var(--brand) }
+.status { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--bar-muted); font-size: 13px; min-width: 0 }
+.status a { color: var(--bar-text) }
+#upd-btn { background: transparent; color: var(--bar-text); border-color: rgba(251,246,234,.35) } #upd-btn:hover { background: rgba(251,246,234,.1) }
 .status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 button { font: inherit; font-weight: 600; font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: 6px; padding: 6px 12px; cursor: pointer } button:hover { background: var(--sunken) } button:disabled { opacity: .5; cursor: progress }
 
 /* Page head */
 .head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 24px 0 16px }
-h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin: 0 }
+h1 { font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: .01em; margin: 0; line-height: 1.15 }
 .sub { color: var(--muted); margin-top: 2px }
 .days { display: flex; gap: 4px; flex-wrap: wrap }
-.days a { padding: 5px 10px; border-radius: 6px; color: var(--muted); font-weight: 500; font-size: 13px; text-decoration: none; border: 1px solid transparent }
-.days a:hover { background: var(--sunken) }
-.days a[aria-current="page"] { color: var(--text); border-color: var(--line-strong); background: var(--surface) }
+.days a, .pagebtn { padding: 5px 12px; border-radius: 6px; color: var(--text); font-weight: 600; font-size: 13px; text-decoration: none;
+  border: 1px solid var(--line-strong); background: var(--surface); white-space: nowrap }
+.days a:hover, .pagebtn:hover { background: var(--sunken); text-decoration: none }
+.days a[aria-current="page"] { color: var(--surface); border-color: var(--text); background: var(--text) }
 .notice { border: 1px solid var(--line); background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 13px }
 
 /* KPI strip */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-bottom: 24px; overflow: hidden }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-top: 3px solid var(--text); border-radius: 10px; background: var(--surface); margin-bottom: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,44,73,.06) }
 .kpi { padding: 12px 16px; border-right: 1px solid var(--line) } .kpi:last-child { border-right: 0 }
-.kpi .k { color: var(--muted); font-size: 12px; font-weight: 500 } .kpi .v { font-size: 18px; font-weight: 600; margin-top: 2px; letter-spacing: -.01em }
+.kpi .k { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em } .kpi .v { font-size: 21px; font-weight: 800; margin-top: 3px; letter-spacing: -.01em }
 .kpi .v small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 4px }
 
 /* Panels and tables */
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 24px; overflow: hidden }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,44,73,.06) }
 .panel-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line) }
-.panel-h h2 { font-size: 15px; font-weight: 600; margin: 0 } .panel-h .note { color: var(--muted); font-size: 12px }
+.panel-h h2 { font-size: 13px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: .07em; display: flex; align-items: center; gap: 8px }
+.panel-h h2::before { content: ""; width: 4px; height: 14px; background: var(--brand); border-radius: 2px } .panel-h .note { color: var(--muted); font-size: 12px }
 .scroll { overflow-x: auto }
 table { width: 100%; border-collapse: collapse; font-size: 13px }
-th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--sunken); white-space: nowrap }
+th { text-align: left; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--sunken); white-space: nowrap }
 td { padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: middle }
 tbody tr:last-child td { border-bottom: 0 }
 .r { text-align: right } .c { text-align: center } .m { color: var(--muted) } .f { color: var(--faint) }
@@ -71,7 +97,7 @@ tbody tr:last-child td { border-bottom: 0 }
 .betlink { font-weight: 600; font-size: 12px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 10px; color: var(--text); display: inline-block }
 .betlink:hover { background: var(--sunken); text-decoration: none }
 .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--muted) }
-.tag.bet { color: var(--pos); border-color: var(--pos); background: var(--pos-bg) }
+.tag.bet { color: #fff; border-color: var(--brand); background: var(--brand) }
 
 /* Segmented control */
 .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 6px; overflow: hidden }
@@ -89,40 +115,66 @@ label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--mu
 .board .team { font-weight: 500 }
 .inj { color: var(--warn); font-size: 11px; font-weight: 500; white-space: normal; max-width: 340px; margin-top: 1px } .board .tm { width: 72px; color: var(--muted); font-size: 12px }
 .board .pts { color: var(--muted); width: 40px }
-.odd { display: inline-flex; flex-direction: column; align-items: flex-end; min-width: 64px; padding: 3px 8px; border-radius: 6px; line-height: 1.25; color: var(--text); text-decoration: none }
+.odd { display: inline-flex; flex-direction: column; align-items: flex-end; min-width: 56px; padding: 3px 6px; border-radius: 6px; line-height: 1.25; color: var(--text); text-decoration: none }
 .odd small { color: var(--faint); font-size: 11px }
 a.odd:hover { background: var(--sunken); text-decoration: none }
 .odd.best { background: var(--pos-bg); color: var(--pos) } .odd.best small { color: var(--pos) }
 .na { color: var(--faint) }
-.board th.bk, .board td.bk { text-align: right; width: 96px }
-.board tbody.g.has-bet { background: linear-gradient(90deg, var(--pos) 0 2px, transparent 2px) }
+.board th.bk, .board td.bk { text-align: right; width: 84px; padding-left: 6px; padding-right: 6px }
+.board td.edge { white-space: normal; min-width: 110px; max-width: 170px } .tag { white-space: normal }
+.bestc { display: none; text-align: right } .tm-sm { display: none; color: var(--faint); font-size: 11px }
+@media (max-width: 1100px) { .bk-minor, .hide-md { display: none } .board .bestc { display: table-cell } }
+.bestc small { display: block; color: var(--faint); font-size: 11px }
+.board tbody.g.has-bet { background: linear-gradient(90deg, var(--brand) 0 3px, transparent 3px) }
 
 details.panel > summary { list-style: none; cursor: pointer; padding: 12px 16px; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between }
 details.panel > summary::after { content: "Show"; color: var(--accent); font-size: 13px; font-weight: 500 }
 details.panel[open] > summary::after { content: "Hide" }
 details.panel[open] > summary { border-bottom: 1px solid var(--line) }
 footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 80ch }
+.follow { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 700; color: var(--text) }
+.follow img { width: 22px; height: 22px; border-radius: 5px }
+.tl img { width: auto; vertical-align: -3px; margin-right: 5px; object-fit: contain }
+.pick .tl img { vertical-align: -5px; margin-right: 6px }
+.hero { display: block; height: 120px; width: auto; max-width: 100%; object-fit: contain; border-radius: 10px; margin-top: 18px; border: 1px solid var(--line) }
+@media (max-width: 720px) { .hero { height: auto; width: 100% } }
 
-@media (max-width: 720px) {
-  .top .wrap { gap: 12px } .status span { display: none }
-  h1 { font-size: 19px }
+@media (max-width: 860px) {
+  .top .wrap { gap: 10px } .status span { display: none }
+  .wordmark { display: none } .tabs a { padding: 0 8px; font-size: 12px }
+  h1 { font-size: 21px }
   .kpi { border-right: 0; border-bottom: 1px solid var(--line) } .kpi:last-child { border-bottom: 0 }
   .hide-sm { display: none } .show-sm { display: inline }
   td, th { padding-left: 10px; padding-right: 10px }
   #t-plays td:first-child, #t-leans td:first-child { white-space: normal; min-width: 150px }
+  .board .bk, .board .pts { display: none } .bestc { display: table-cell }
+  .board .tm { width: 52px; font-size: 11px } .board td.edge { min-width: 0; max-width: 104px }
+  .board td, .board th { padding-left: 6px; padding-right: 6px } .board .team { white-space: normal; min-width: 0 }
+  .board .tag { font-size: 10px; padding: 1px 4px } .board .tl img { width: 14px; height: 14px; margin-right: 4px }
+  .board .tm { display: none } .tm-sm { display: block } .board td.edge { max-width: 104px }
+  table.stack thead { display: none }
+  table.stack tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 12px; border-bottom: 1px solid var(--line) }
+  table.stack tbody tr:last-child { border-bottom: 0 }
+  table.stack td { display: block; border: 0; padding: 0; white-space: normal; text-align: left; min-width: 0 }
+  table.stack td:first-child { grid-column: 1 / -1; min-width: 0 }
+  table.stack td[data-l]::before { content: attr(data-l); display: block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--faint); margin-bottom: 1px }
+  table.stack td:first-child::before { display: none }
+  table.stack td.hide-sm, table.stack td:empty { display: none }
+  table.stack td.empty { grid-column: 1 / -1; text-align: center }
 }
 </style>
 
 <header class="top"><div class="wrap">
-  <a class="brand" href="https://barrca12-rgb.github.io/" style="color:inherit;text-decoration:none">Model Card</a>
-  <nav class="tabs" aria-label="Sport"><a href="https://barrca12-rgb.github.io/NFL/">NFL</a><a href="https://barrca12-rgb.github.io/CBB/"><span class="hide-sm">College Basketball</span><span class="show-sm">CBB</span></a><a href="./" aria-current="page">NBA</a></nav>
+  <a class="brand" href="./" aria-label="Off The Glass home"><img src="assets/otg-logo-512.png" alt="" width="34" height="34"><span class="wordmark">Off The Glass</span></a>
+  <nav class="tabs" aria-label="Sport"><a href="https://barrca12-rgb.github.io/NFL/">NFL</a><a href="./" aria-current="page">NBA</a><a href="https://barrca12-rgb.github.io/CBB/"><span class="hide-sm">College Basketball</span><span class="show-sm">CBB</span></a></nav>
   <div class="status"><span id="upd-status"></span><button id="upd-btn" type="button">Update</button></div>
 </div></header>
 
 <main class="wrap">
   <div class="head">
     <div><h1 id="h1"></h1><div class="sub" id="sub"></div></div>
-    <nav class="days" id="days" aria-label="Days"></nav>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><nav class="days" id="days" aria-label="Days"></nav><a class="pagebtn" id="rec-btn" href="#rec-sec" hidden>Record</a></div>
   </div>
 
   <div class="notice" id="stale" hidden>Live lines unavailable on the last update (SportsGameOdds). Lines shown are the last ones stored; no new plays were logged.</div>
@@ -163,15 +215,11 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   <details class="panel"><summary>Power ratings</summary><div class="scroll"><table id="t-rat"></table></div></details>
 
   <footer>
-    Projections combine opponent-adjusted efficiency and pace ratings from every NBA box score this season with LUMA ARC
-    player ratings for who played in each team's last game (lumahoops.org), rest, back-to-backs, travel, altitude, home court,
-    late-season and playoff scoring, and an in-season bias check. The line is never an input. In a 2023-24 to 2025-26 backtest,
-    totals at 4+ points won 58.8% against opening lines (1,130 plays) and the model broke even against closing lines, so the
-    value is in betting early. Spreads reached about 55% and are tracked only. <a id="bt-link" href="#">Research log</a>.
+    <div><a class="follow" href="https://x.com/OffTheGlassHQ" target="_blank" rel="noopener"><img src="assets/otg-logo-512.png" alt="">Follow @OffTheGlassHQ on X for every play</a></div>
   </footer>
 </main>
 
-<script id="data" type="application/json">{"date": "2026-10-28", "season": 2027, "repo": "barrca12-rgb/NBA", "site": "https://barrca12-rgb.github.io/", "generated_at": "2026-10-27T18:51:19+00:00", "games": [{"game_id": 401909892, "start": "2026-10-29 02:30:00+00:00", "home": "LAC", "away": "LAL", "home_name": "LA Clippers", "away_name": "Los Angeles Lakers", "neutral": false, "home_rest": 3.0, "away_rest": 3.0, "home_avail_net": -1.801, "away_avail_net": 8.461, "home_usual_net": -1.68, "away_usual_net": 9.261, "model_margin": -4.962, "model_total": 228.569, "model_home_pts": 111.803, "model_away_pts": 116.766, "model_home_spread": 4.962, "p_home_win": 0.346, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909891, "start": "2026-10-29 01:30:00+00:00", "home": "DAL", "away": "OKC", "home_name": "Dallas Mavericks", "away_name": "Oklahoma City Thunder", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": -0.952, "away_avail_net": 10.545, "home_usual_net": -2.818, "away_usual_net": 12.908, "model_margin": -10.799, "model_total": 226.233, "model_home_pts": 107.717, "model_away_pts": 118.516, "model_home_spread": 10.799, "p_home_win": 0.194, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909890, "start": "2026-10-29 01:00:00+00:00", "home": "UTAH", "away": "SA", "home_name": "Utah Jazz", "away_name": "San Antonio Spurs", "neutral": false, "home_rest": 2.0, "away_rest": 4.0, "home_avail_net": -3.865, "away_avail_net": 10.707, "home_usual_net": -2.925, "away_usual_net": 9.665, "model_margin": -10.803, "model_total": 231.743, "model_home_pts": 110.47, "model_away_pts": 121.273, "model_home_spread": 10.803, "p_home_win": 0.194, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909886, "start": "2026-10-29 00:00:00+00:00", "home": "CHI", "away": "NY", "home_name": "Chicago Bulls", "away_name": "New York Knicks", "neutral": false, "home_rest": 2.0, "away_rest": 3.0, "home_avail_net": -3.404, "away_avail_net": 3.64, "home_usual_net": -1.689, "away_usual_net": 4.302, "model_margin": -8.897, "model_total": 230.764, "model_home_pts": 110.934, "model_away_pts": 119.83, "model_home_spread": 8.897, "p_home_win": 0.238, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909887, "start": "2026-10-29 00:00:00+00:00", "home": "MIL", "away": "HOU", "home_name": "Milwaukee Bucks", "away_name": "Houston Rockets", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": -5.22, "away_avail_net": 6.599, "home_usual_net": -4.287, "away_usual_net": 7.906, "model_margin": -10.249, "model_total": 227.111, "model_home_pts": 108.431, "model_away_pts": 118.68, "model_home_spread": 10.249, "p_home_win": 0.206, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909888, "start": "2026-10-29 00:00:00+00:00", "home": "MIN", "away": "GS", "home_name": "Minnesota Timberwolves", "away_name": "Golden State Warriors", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": 1.564, "away_avail_net": -1.073, "home_usual_net": 1.44, "away_usual_net": -0.98, "model_margin": 5.086, "model_total": 226.024, "model_home_pts": 115.555, "model_away_pts": 110.469, "model_home_spread": -5.086, "p_home_win": 0.658, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909889, "start": "2026-10-29 00:00:00+00:00", "home": "NO", "away": "DEN", "home_name": "New Orleans Pelicans", "away_name": "Denver Nuggets", "neutral": false, "home_rest": 4.0, "away_rest": 2.0, "home_avail_net": -0.25, "away_avail_net": 7.172, "home_usual_net": 0.403, "away_usual_net": 9.352, "model_margin": -3.132, "model_total": 234.409, "model_home_pts": 115.639, "model_away_pts": 118.771, "model_home_spread": 3.132, "p_home_win": 0.401, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909885, "start": "2026-10-28 23:30:00+00:00", "home": "TOR", "away": "ORL", "home_name": "Toronto Raptors", "away_name": "Orlando Magic", "neutral": false, "home_rest": 3.0, "away_rest": 3.0, "home_avail_net": -0.186, "away_avail_net": 5.738, "home_usual_net": 3.567, "away_usual_net": 4.476, "model_margin": 0.585, "model_total": 224.539, "model_home_pts": 112.562, "model_away_pts": 111.977, "model_home_spread": -0.585, "p_home_win": 0.519, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909881, "start": "2026-10-28 23:00:00+00:00", "home": "ATL", "away": "MIA", "home_name": "Atlanta Hawks", "away_name": "Miami Heat", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": 1.508, "away_avail_net": 8.088, "home_usual_net": 2.359, "away_usual_net": 7.481, "model_margin": 1.918, "model_total": 238.664, "model_home_pts": 120.291, "model_away_pts": 118.373, "model_home_spread": -1.918, "p_home_win": 0.561, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909882, "start": "2026-10-28 23:00:00+00:00", "home": "CLE", "away": "WSH", "home_name": "Cleveland Cavaliers", "away_name": "Washington Wizards", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": 8.955, "away_avail_net": -5.301, "home_usual_net": 8.024, "away_usual_net": -2.949, "model_margin": 11.155, "model_total": 234.364, "model_home_pts": 122.759, "model_away_pts": 111.604, "model_home_spread": -11.155, "p_home_win": 0.814, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909883, "start": "2026-10-28 23:00:00+00:00", "home": "DET", "away": "CHA", "home_name": "Detroit Pistons", "away_name": "Charlotte Hornets", "neutral": false, "home_rest": 3.0, "away_rest": 2.0, "home_avail_net": 5.732, "away_avail_net": -1.432, "home_usual_net": 6.968, "away_usual_net": -1.414, "model_margin": 7.654, "model_total": 216.838, "model_home_pts": 112.246, "model_away_pts": 104.592, "model_home_spread": -7.654, "p_home_win": 0.73, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909884, "start": "2026-10-28 23:00:00+00:00", "home": "IND", "away": "PHI", "home_name": "Indiana Pacers", "away_name": "Philadelphia 76ers", "neutral": false, "home_rest": 2.0, "away_rest": 3.0, "home_avail_net": 2.521, "away_avail_net": 3.592, "home_usual_net": 2.794, "away_usual_net": 4.329, "model_margin": -3.008, "model_total": 229.036, "model_home_pts": 113.014, "model_away_pts": 116.022, "model_home_spread": 3.008, "p_home_win": 0.405, "n_books": 4, "book_lines": [{"book": "FanDuel", "home_spread": 2.5, "home_spread_odds": -104.0, "away_spread_odds": -118.0, "total": 238.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": 120.0, "away_ml": -142.0, "home_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055466&selectionId=237481", "away_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055466&selectionId=40274538", "over_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055522&selectionId=7017823", "under_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055522&selectionId=7017824", "home_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=42.619736218&selectionId=237481", "away_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=42.619736218&selectionId=40274538"}, {"book": "DraftKings", "home_spread": 2.5, "home_spread_odds": -115.0, "away_spread_odds": -105.0, "total": 239.5, "over_odds": -112.0, "under_odds": -108.0, "home_ml": 120.0, "away_ml": -142.0, "home_spread_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0HC86939460P250_1", "away_spread_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0HC86939460N250_3", "over_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0OU86939460O23950_1", "under_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0OU86939460U23950_3", "home_ml_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0ML86939460_1", "away_ml_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0ML86939460_3"}, {"book": "theScore Bet", "home_spread": 2.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": null, "over_odds": null, "under_odds": null, "home_ml": 130.0, "away_ml": -150.0, "home_spread_link": "https://espnbet.app.link/?market_selection_id[0]=19e5a35d-973c-4d6f-9fc9-8d35dae2a695&odds_numerator[0]=2&odds_denominator[0]=1", "away_spread_link": "https://espnbet.app.link/?market_selection_id[0]=802c8254-c7be-42ce-ba4a-18a70ffb99e3&odds_numerator[0]=2&odds_denominator[0]=1", "over_link": null, "under_link": null, "home_ml_link": "https://espnbet.app.link/?market_selection_id[0]=f05da8fa-2359-4b69-8e79-f0e0bdb2e6da&odds_numerator[0]=2&odds_denominator[0]=1", "away_ml_link": "https://espnbet.app.link/?market_selection_id[0]=ebe049cc-aba4-419e-a3fa-c592ea36d5a9&odds_numerator[0]=2&odds_denominator[0]=1"}, {"book": "Caesars", "home_spread": null, "home_spread_odds": null, "away_spread_odds": null, "total": 238.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": 122.0, "away_ml": -145.0, "home_spread_link": null, "away_spread_link": null, "over_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=3e8eaca2-b941-39ce-b587-6d72bc9779ba", "under_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=b8ffd80f-a297-3254-9f5c-aed5e354fe5b", "home_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=b42d1d85-0f8b-3cf2-9b39-fe2753d7a4bb", "away_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=e72c8cfb-39d6-33bd-8f2d-4410dbf1cf79"}], "sgo_event": "VGJWBj7vPgHtBMUiei6o", "open_total": 237.5, "open_home_spread": 1.5, "first_seen": "2026-10-27T18:03:33+00:00", "total_verdict": "BET", "total_pick": "Under", "total_line": 239.5, "total_odds": -108.0, "total_book": "DraftKings", "total_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0OU86939460U23950_3", "total_edge": 10.46, "total_p": 0.6, "total_ev": 0.156, "total_good_to": 233.036, "total_units": 1.0, "total_warn": "Edge of 8+ points: rare in the backtest. Check injury news and the lineup; the model only knows who played in each team's last game.", "spread_verdict": null, "spread_side": "away", "spread_pick": "PHI", "spread_line": -2.5, "spread_odds": -105.0, "spread_book": "DraftKings", "spread_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0HC86939460N250_3", "spread_edge": 0.51, "spread_p": 0.545}], "ratings": [{"rank": 1, "team": "Oklahoma City Thunder", "net": 6.572, "adj_oe": 110.496, "adj_de": 103.924, "adj_tempo": 103.583}, {"rank": 2, "team": "San Antonio Spurs", "net": 5.728, "adj_oe": 110.569, "adj_de": 104.841, "adj_tempo": 104.656}, {"rank": 3, "team": "Detroit Pistons", "net": 4.261, "adj_oe": 110.011, "adj_de": 105.75, "adj_tempo": 102.525}, {"rank": 4, "team": "Boston Celtics", "net": 4.149, "adj_oe": 111.064, "adj_de": 106.916, "adj_tempo": 102.232}, {"rank": 5, "team": "New York Knicks", "net": 4.145, "adj_oe": 109.313, "adj_de": 105.168, "adj_tempo": 102.522}, {"rank": 6, "team": "Minnesota Timberwolves", "net": 4.133, "adj_oe": 110.119, "adj_de": 105.986, "adj_tempo": 103.932}, {"rank": 7, "team": "Portland Trail Blazers", "net": 3.772, "adj_oe": 110.193, "adj_de": 106.421, "adj_tempo": 104.012}, {"rank": 8, "team": "Houston Rockets", "net": 3.681, "adj_oe": 111.55, "adj_de": 107.869, "adj_tempo": 102.329}, {"rank": 9, "team": "Atlanta Hawks", "net": 3.595, "adj_oe": 111.452, "adj_de": 107.857, "adj_tempo": 106.029}, {"rank": 10, "team": "Toronto Raptors", "net": 2.853, "adj_oe": 108.522, "adj_de": 105.669, "adj_tempo": 104.983}, {"rank": 11, "team": "Los Angeles Lakers", "net": 1.827, "adj_oe": 111.344, "adj_de": 109.518, "adj_tempo": 103.362}, {"rank": 12, "team": "LA Clippers", "net": 1.207, "adj_oe": 109.263, "adj_de": 108.056, "adj_tempo": 104.13}, {"rank": 13, "team": "Cleveland Cavaliers", "net": 0.907, "adj_oe": 109.748, "adj_de": 108.841, "adj_tempo": 105.073}, {"rank": 14, "team": "Philadelphia 76ers", "net": 0.804, "adj_oe": 107.671, "adj_de": 106.867, "adj_tempo": 105.738}, {"rank": 15, "team": "Charlotte Hornets", "net": -0.131, "adj_oe": 108.286, "adj_de": 108.417, "adj_tempo": 101.79}, {"rank": 16, "team": "Orlando Magic", "net": -0.142, "adj_oe": 107.544, "adj_de": 107.687, "adj_tempo": 105.452}, {"rank": 17, "team": "Denver Nuggets", "net": -0.611, "adj_oe": 110.996, "adj_de": 111.607, "adj_tempo": 102.108}, {"rank": 18, "team": "Phoenix Suns", "net": -1.557, "adj_oe": 109.633, "adj_de": 111.19, "adj_tempo": 103.094}, {"rank": 19, "team": "Miami Heat", "net": -1.816, "adj_oe": 109.236, "adj_de": 111.052, "adj_tempo": 106.02}, {"rank": 20, "team": "Golden State Warriors", "net": -1.817, "adj_oe": 110.229, "adj_de": 112.046, "adj_tempo": 102.995}, {"rank": 21, "team": "New Orleans Pelicans", "net": -2.305, "adj_oe": 110.097, "adj_de": 112.403, "adj_tempo": 105.545}, {"rank": 22, "team": "Indiana Pacers", "net": -2.349, "adj_oe": 108.51, "adj_de": 110.858, "adj_tempo": 105.014}, {"rank": 23, "team": "Dallas Mavericks", "net": -2.366, "adj_oe": 108.407, "adj_de": 110.774, "adj_tempo": 104.981}, {"rank": 24, "team": "Memphis Grizzlies", "net": -2.505, "adj_oe": 108.012, "adj_de": 110.518, "adj_tempo": 104.174}, {"rank": 25, "team": "Utah Jazz", "net": -4.772, "adj_oe": 108.057, "adj_de": 112.829, "adj_tempo": 105.495}, {"rank": 26, "team": "Washington Wizards", "net": -4.897, "adj_oe": 107.942, "adj_de": 112.839, "adj_tempo": 104.906}, {"rank": 27, "team": "Sacramento Kings", "net": -4.917, "adj_oe": 108.458, "adj_de": 113.374, "adj_tempo": 103.957}, {"rank": 28, "team": "Chicago Bulls", "net": -5.031, "adj_oe": 106.781, "adj_de": 111.811, "adj_tempo": 108.875}, {"rank": 29, "team": "Milwaukee Bucks", "net": -5.608, "adj_oe": 107.478, "adj_de": 113.086, "adj_tempo": 104.212}, {"rank": 30, "team": "Brooklyn Nets", "net": -6.81, "adj_oe": 104.615, "adj_de": 111.426, "adj_tempo": 105.157}], "record": {"status": {"totals": {"bets": 0, "w": 0, "l": 0, "p": 0, "win": null, "units": 0.0, "roi": null, "clv_pts": null, "beat_close": null, "open": 2}, "spread leans": {"bets": 0, "w": 0, "l": 0, "p": 0, "win": null, "units": 0.0, "roi": null, "clv_pts": null, "beat_close": null, "open": 1}}, "recent": []}, "usage": {"used": 5955, "max": 100000}}</script>
+<script id="data" type="application/json">{"date": "2026-10-28", "season": 2027, "repo": "barrca12-rgb/NBA", "site": "https://barrca12-rgb.github.io/", "generated_at": "2026-10-27T19:05:39+00:00", "games": [{"game_id": 401909892, "start": "2026-10-29 02:30:00+00:00", "home": "LAC", "away": "LAL", "home_name": "LA Clippers", "away_name": "Los Angeles Lakers", "neutral": false, "home_rest": 3.0, "away_rest": 3.0, "home_avail_net": -1.801, "away_avail_net": 8.461, "home_usual_net": -1.68, "away_usual_net": 9.261, "model_margin": -4.962, "model_total": 228.569, "model_home_pts": 111.803, "model_away_pts": 116.766, "model_home_spread": 4.962, "p_home_win": 0.346, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909891, "start": "2026-10-29 01:30:00+00:00", "home": "DAL", "away": "OKC", "home_name": "Dallas Mavericks", "away_name": "Oklahoma City Thunder", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": -0.952, "away_avail_net": 10.545, "home_usual_net": -2.818, "away_usual_net": 12.908, "model_margin": -10.799, "model_total": 226.233, "model_home_pts": 107.717, "model_away_pts": 118.516, "model_home_spread": 10.799, "p_home_win": 0.194, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909890, "start": "2026-10-29 01:00:00+00:00", "home": "UTAH", "away": "SA", "home_name": "Utah Jazz", "away_name": "San Antonio Spurs", "neutral": false, "home_rest": 2.0, "away_rest": 4.0, "home_avail_net": -3.865, "away_avail_net": 10.707, "home_usual_net": -2.925, "away_usual_net": 9.665, "model_margin": -10.803, "model_total": 231.743, "model_home_pts": 110.47, "model_away_pts": 121.273, "model_home_spread": 10.803, "p_home_win": 0.194, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909886, "start": "2026-10-29 00:00:00+00:00", "home": "CHI", "away": "NY", "home_name": "Chicago Bulls", "away_name": "New York Knicks", "neutral": false, "home_rest": 2.0, "away_rest": 3.0, "home_avail_net": -3.404, "away_avail_net": 3.64, "home_usual_net": -1.689, "away_usual_net": 4.302, "model_margin": -8.897, "model_total": 230.764, "model_home_pts": 110.934, "model_away_pts": 119.83, "model_home_spread": 8.897, "p_home_win": 0.238, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909887, "start": "2026-10-29 00:00:00+00:00", "home": "MIL", "away": "HOU", "home_name": "Milwaukee Bucks", "away_name": "Houston Rockets", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": -5.22, "away_avail_net": 6.599, "home_usual_net": -4.287, "away_usual_net": 7.906, "model_margin": -10.249, "model_total": 227.111, "model_home_pts": 108.431, "model_away_pts": 118.68, "model_home_spread": 10.249, "p_home_win": 0.206, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909888, "start": "2026-10-29 00:00:00+00:00", "home": "MIN", "away": "GS", "home_name": "Minnesota Timberwolves", "away_name": "Golden State Warriors", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": 1.564, "away_avail_net": -1.073, "home_usual_net": 1.44, "away_usual_net": -0.98, "model_margin": 5.086, "model_total": 226.024, "model_home_pts": 115.555, "model_away_pts": 110.469, "model_home_spread": -5.086, "p_home_win": 0.658, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909889, "start": "2026-10-29 00:00:00+00:00", "home": "NO", "away": "DEN", "home_name": "New Orleans Pelicans", "away_name": "Denver Nuggets", "neutral": false, "home_rest": 4.0, "away_rest": 2.0, "home_avail_net": -0.25, "away_avail_net": 7.172, "home_usual_net": 0.403, "away_usual_net": 9.352, "model_margin": -3.132, "model_total": 234.409, "model_home_pts": 115.639, "model_away_pts": 118.771, "model_home_spread": 3.132, "p_home_win": 0.401, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909885, "start": "2026-10-28 23:30:00+00:00", "home": "TOR", "away": "ORL", "home_name": "Toronto Raptors", "away_name": "Orlando Magic", "neutral": false, "home_rest": 3.0, "away_rest": 3.0, "home_avail_net": -0.186, "away_avail_net": 5.738, "home_usual_net": 3.567, "away_usual_net": 4.476, "model_margin": 0.585, "model_total": 224.539, "model_home_pts": 112.562, "model_away_pts": 111.977, "model_home_spread": -0.585, "p_home_win": 0.519, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909881, "start": "2026-10-28 23:00:00+00:00", "home": "ATL", "away": "MIA", "home_name": "Atlanta Hawks", "away_name": "Miami Heat", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": 1.508, "away_avail_net": 8.088, "home_usual_net": 2.359, "away_usual_net": 7.481, "model_margin": 1.918, "model_total": 238.664, "model_home_pts": 120.291, "model_away_pts": 118.373, "model_home_spread": -1.918, "p_home_win": 0.561, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909882, "start": "2026-10-28 23:00:00+00:00", "home": "CLE", "away": "WSH", "home_name": "Cleveland Cavaliers", "away_name": "Washington Wizards", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": 8.955, "away_avail_net": -5.301, "home_usual_net": 8.024, "away_usual_net": -2.949, "model_margin": 11.155, "model_total": 234.364, "model_home_pts": 122.759, "model_away_pts": 111.604, "model_home_spread": -11.155, "p_home_win": 0.814, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909883, "start": "2026-10-28 23:00:00+00:00", "home": "DET", "away": "CHA", "home_name": "Detroit Pistons", "away_name": "Charlotte Hornets", "neutral": false, "home_rest": 3.0, "away_rest": 2.0, "home_avail_net": 5.732, "away_avail_net": -1.432, "home_usual_net": 6.968, "away_usual_net": -1.414, "model_margin": 7.654, "model_total": 216.838, "model_home_pts": 112.246, "model_away_pts": 104.592, "model_home_spread": -7.654, "p_home_win": 0.73, "n_books": 0, "book_lines": [], "sgo_event": null, "open_total": null, "open_home_spread": null, "first_seen": null, "total_verdict": null, "spread_verdict": null}, {"game_id": 401909884, "start": "2026-10-28 23:00:00+00:00", "home": "IND", "away": "PHI", "home_name": "Indiana Pacers", "away_name": "Philadelphia 76ers", "neutral": false, "home_rest": 2.0, "away_rest": 3.0, "home_avail_net": 2.521, "away_avail_net": 3.592, "home_usual_net": 2.794, "away_usual_net": 4.329, "model_margin": -3.008, "model_total": 229.036, "model_home_pts": 113.014, "model_away_pts": 116.022, "model_home_spread": 3.008, "p_home_win": 0.405, "n_books": 4, "book_lines": [{"book": "FanDuel", "home_spread": 2.5, "home_spread_odds": -104.0, "away_spread_odds": -118.0, "total": 238.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": 120.0, "away_ml": -142.0, "home_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055466&selectionId=237481", "away_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055466&selectionId=40274538", "over_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055522&selectionId=7017823", "under_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194055522&selectionId=7017824", "home_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=42.619736218&selectionId=237481", "away_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=42.619736218&selectionId=40274538"}, {"book": "DraftKings", "home_spread": 2.5, "home_spread_odds": -115.0, "away_spread_odds": -105.0, "total": 239.5, "over_odds": -112.0, "under_odds": -108.0, "home_ml": 120.0, "away_ml": -142.0, "home_spread_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0HC86939460P250_1", "away_spread_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0HC86939460N250_3", "over_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0OU86939460O23950_1", "under_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0OU86939460U23950_3", "home_ml_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0ML86939460_1", "away_ml_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0ML86939460_3"}, {"book": "theScore Bet", "home_spread": 2.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": 239.5, "over_odds": -115.0, "under_odds": -105.0, "home_ml": 130.0, "away_ml": -150.0, "home_spread_link": "https://espnbet.app.link/?market_selection_id[0]=19e5a35d-973c-4d6f-9fc9-8d35dae2a695&odds_numerator[0]=2&odds_denominator[0]=1", "away_spread_link": "https://espnbet.app.link/?market_selection_id[0]=802c8254-c7be-42ce-ba4a-18a70ffb99e3&odds_numerator[0]=2&odds_denominator[0]=1", "over_link": "https://espnbet.app.link/?market_selection_id[0]=6adfd017-447c-42fa-8fe0-ece6b3d43df7&odds_numerator[0]=2&odds_denominator[0]=1", "under_link": "https://espnbet.app.link/?market_selection_id[0]=002f3ac5-edb1-4faa-923b-86ea4e1dc09e&odds_numerator[0]=2&odds_denominator[0]=1", "home_ml_link": "https://espnbet.app.link/?market_selection_id[0]=f05da8fa-2359-4b69-8e79-f0e0bdb2e6da&odds_numerator[0]=2&odds_denominator[0]=1", "away_ml_link": "https://espnbet.app.link/?market_selection_id[0]=ebe049cc-aba4-419e-a3fa-c592ea36d5a9&odds_numerator[0]=2&odds_denominator[0]=1"}, {"book": "Caesars", "home_spread": null, "home_spread_odds": null, "away_spread_odds": null, "total": 238.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": 122.0, "away_ml": -145.0, "home_spread_link": null, "away_spread_link": null, "over_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=3e8eaca2-b941-39ce-b587-6d72bc9779ba", "under_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=b8ffd80f-a297-3254-9f5c-aed5e354fe5b", "home_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=b42d1d85-0f8b-3cf2-9b39-fe2753d7a4bb", "away_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=e72c8cfb-39d6-33bd-8f2d-4410dbf1cf79"}], "sgo_event": "VGJWBj7vPgHtBMUiei6o", "open_total": 237.5, "open_home_spread": 1.5, "first_seen": "2026-10-27T18:03:33+00:00", "total_verdict": "BET", "total_pick": "Under", "total_line": 239.5, "total_odds": -105.0, "total_book": "theScore Bet", "total_link": "https://espnbet.app.link/?market_selection_id[0]=002f3ac5-edb1-4faa-923b-86ea4e1dc09e&odds_numerator[0]=2&odds_denominator[0]=1", "total_edge": 10.46, "total_p": 0.6, "total_ev": 0.171, "total_good_to": 233.036, "total_units": 1.0, "total_warn": "Edge of 8+ points: rare in the backtest. Check injury news and the lineup; the model only knows who played in each team's last game.", "spread_verdict": null, "spread_side": "away", "spread_pick": "PHI", "spread_line": -2.5, "spread_odds": -105.0, "spread_book": "DraftKings", "spread_link": "https://sportsbook.draftkings.com/event/34904707?outcomes=0HC86939460N250_3", "spread_edge": 0.51, "spread_p": 0.545}], "ratings": [{"rank": 1, "team": "Oklahoma City Thunder", "net": 6.572, "adj_oe": 110.496, "adj_de": 103.924, "adj_tempo": 103.583}, {"rank": 2, "team": "San Antonio Spurs", "net": 5.728, "adj_oe": 110.569, "adj_de": 104.841, "adj_tempo": 104.656}, {"rank": 3, "team": "Detroit Pistons", "net": 4.261, "adj_oe": 110.011, "adj_de": 105.75, "adj_tempo": 102.525}, {"rank": 4, "team": "Boston Celtics", "net": 4.149, "adj_oe": 111.064, "adj_de": 106.916, "adj_tempo": 102.232}, {"rank": 5, "team": "New York Knicks", "net": 4.145, "adj_oe": 109.313, "adj_de": 105.168, "adj_tempo": 102.522}, {"rank": 6, "team": "Minnesota Timberwolves", "net": 4.133, "adj_oe": 110.119, "adj_de": 105.986, "adj_tempo": 103.932}, {"rank": 7, "team": "Portland Trail Blazers", "net": 3.772, "adj_oe": 110.193, "adj_de": 106.421, "adj_tempo": 104.012}, {"rank": 8, "team": "Houston Rockets", "net": 3.681, "adj_oe": 111.55, "adj_de": 107.869, "adj_tempo": 102.329}, {"rank": 9, "team": "Atlanta Hawks", "net": 3.595, "adj_oe": 111.452, "adj_de": 107.857, "adj_tempo": 106.029}, {"rank": 10, "team": "Toronto Raptors", "net": 2.853, "adj_oe": 108.522, "adj_de": 105.669, "adj_tempo": 104.983}, {"rank": 11, "team": "Los Angeles Lakers", "net": 1.827, "adj_oe": 111.344, "adj_de": 109.518, "adj_tempo": 103.362}, {"rank": 12, "team": "LA Clippers", "net": 1.207, "adj_oe": 109.263, "adj_de": 108.056, "adj_tempo": 104.13}, {"rank": 13, "team": "Cleveland Cavaliers", "net": 0.907, "adj_oe": 109.748, "adj_de": 108.841, "adj_tempo": 105.073}, {"rank": 14, "team": "Philadelphia 76ers", "net": 0.804, "adj_oe": 107.671, "adj_de": 106.867, "adj_tempo": 105.738}, {"rank": 15, "team": "Charlotte Hornets", "net": -0.131, "adj_oe": 108.286, "adj_de": 108.417, "adj_tempo": 101.79}, {"rank": 16, "team": "Orlando Magic", "net": -0.142, "adj_oe": 107.544, "adj_de": 107.687, "adj_tempo": 105.452}, {"rank": 17, "team": "Denver Nuggets", "net": -0.611, "adj_oe": 110.996, "adj_de": 111.607, "adj_tempo": 102.108}, {"rank": 18, "team": "Phoenix Suns", "net": -1.557, "adj_oe": 109.633, "adj_de": 111.19, "adj_tempo": 103.094}, {"rank": 19, "team": "Miami Heat", "net": -1.816, "adj_oe": 109.236, "adj_de": 111.052, "adj_tempo": 106.02}, {"rank": 20, "team": "Golden State Warriors", "net": -1.817, "adj_oe": 110.229, "adj_de": 112.046, "adj_tempo": 102.995}, {"rank": 21, "team": "New Orleans Pelicans", "net": -2.305, "adj_oe": 110.097, "adj_de": 112.403, "adj_tempo": 105.545}, {"rank": 22, "team": "Indiana Pacers", "net": -2.349, "adj_oe": 108.51, "adj_de": 110.858, "adj_tempo": 105.014}, {"rank": 23, "team": "Dallas Mavericks", "net": -2.366, "adj_oe": 108.407, "adj_de": 110.774, "adj_tempo": 104.981}, {"rank": 24, "team": "Memphis Grizzlies", "net": -2.505, "adj_oe": 108.012, "adj_de": 110.518, "adj_tempo": 104.174}, {"rank": 25, "team": "Utah Jazz", "net": -4.772, "adj_oe": 108.057, "adj_de": 112.829, "adj_tempo": 105.495}, {"rank": 26, "team": "Washington Wizards", "net": -4.897, "adj_oe": 107.942, "adj_de": 112.839, "adj_tempo": 104.906}, {"rank": 27, "team": "Sacramento Kings", "net": -4.917, "adj_oe": 108.458, "adj_de": 113.374, "adj_tempo": 103.957}, {"rank": 28, "team": "Chicago Bulls", "net": -5.031, "adj_oe": 106.781, "adj_de": 111.811, "adj_tempo": 108.875}, {"rank": 29, "team": "Milwaukee Bucks", "net": -5.608, "adj_oe": 107.478, "adj_de": 113.086, "adj_tempo": 104.212}, {"rank": 30, "team": "Brooklyn Nets", "net": -6.81, "adj_oe": 104.615, "adj_de": 111.426, "adj_tempo": 105.157}], "record": {"status": {"totals": {"bets": 0, "w": 0, "l": 0, "p": 0, "win": null, "units": 0.0, "roi": null, "clv_pts": null, "beat_close": null, "open": 2}, "spread leans": {"bets": 0, "w": 0, "l": 0, "p": 0, "win": null, "units": 0.0, "roi": null, "clv_pts": null, "beat_close": null, "open": 1}}, "recent": []}, "usage": {"used": 6073, "max": 100000}}</script>
 <script>
 (() => {
   const D = JSON.parse(document.getElementById("data").textContent);
@@ -185,11 +233,16 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const playAt = (v, higherBetter) => v == null ? null : (higherBetter ? Math.ceil(v * 2 - 1e-9) : Math.floor(v * 2 + 1e-9)) / 2;
   const day = new Date(D.date + "T12:00:00");
   const tip = (g) => g.start ? new Date(g.start).toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit", timeZone: "America/New_York"}) : "";
-  const matchup = (g) => g.away + (g.neutral ? " vs " : " @ ") + g.home;
+  const stack = (id) => { const t = $(id); if (!t) return; const hs = [...t.querySelectorAll("thead th")].map((h) => h.textContent.trim());
+    t.classList.add("stack"); t.querySelectorAll("tbody tr").forEach((r) => [...r.children].forEach((c, k) => { if (hs[k]) c.dataset.l = hs[k]; })); };
+  // ESPN logos by team abbreviation; a logo that fails to load is removed
+  const logo = (ab, px) => !ab ? "" : "<picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/" +
+    esc(String(ab).toLowerCase()) + ".png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/" + esc(String(ab).toLowerCase()) + ".png' alt='' loading='lazy' width='" + px +
+    "' height='" + px + "' onerror=\"this.closest('picture').remove()\"></picture>";
+  const matchupL = (g) => logo(g.away, 14) + esc(g.away) + (g.neutral ? " vs " : " @ ") + logo(g.home, 14) + esc(g.home);
   const BOOKS = ["FanDuel", "DraftKings", "BetMGM", "Caesars", "Fanatics", "bet365", "theScore Bet"];
   const bl = (g, bk) => (g.book_lines || []).find((x) => x.book === bk);
 
-  $("bt-link").href = "https://github.com/" + D.repo + "/blob/HEAD/research/LOG.md";
   $("h1").textContent = day.toLocaleDateString("en-US", {weekday: "long", month: "long", day: "numeric"});
   const withLines = D.games.filter((g) => g.n_books > 0).length;
   $("sub").textContent = D.games.length + " games · " + withLines + " with lines · " + (D.season - 1) + "–" + String(D.season).slice(2) + " season";
@@ -210,20 +263,19 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const rest = (g) => "Rest " + (g.away_rest == null ? "–" : Math.min(g.away_rest, 7) + "d") + " / " + (g.home_rest == null ? "–" : Math.min(g.home_rest, 7) + "d");
   const missing = (g) => ["away", "home"].map((sd) => { const u = g[sd + "_usual_net"], a = g[sd + "_avail_net"];
     return u != null && a != null && u - a > 1 ? g[sd] + " short-handed in last game (" + sgn(a - u) + " ARC)" : ""; }).filter(Boolean).join(" · ");
-  $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm'>Opened</th><th class='r hide-sm'>Units</th><th></th></tr></thead><tbody>" +
-    P.map((p) => "<tr><td><div class='b'>" + esc(p.bet) + "</div><div class='f' style='font-size:12px'>" + esc(matchup(p.g)) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
+  $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm'>Opened</th><th class='r hide-sm'>Units</th></tr></thead><tbody>" +
+    P.map((p) => "<tr><td><div class='b pick'>" + esc(p.bet) + "</div><div class='f' style='font-size:12px'>" + matchupL(p.g) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
       (missing(p.g) ? "<div class='inj'>" + esc(missing(p.g)) + "</div>" : "") +
       (p.g.total_warn ? "<div class='inj'>&#9888; " + esc(p.g.total_warn) + "</div>" : "") + "</td><td>" +
       esc(p.book || "–") + (p.price != null ? " <span class='m'>" + esc(odds(p.price)) + "</span>" : "") + "</td><td class='r m hide-sm'>" + esc(p.model) + "</td><td class='r pos b'>" + sgn(p.edge) +
       "</td><td class='r m hide-sm'>" + pct(p.p) + "</td><td class='r'>" + (p.ev == null ? "–" : sgn(100 * p.ev) + "%") +
-      "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm'>" + num(p.units, 2) + "</td><td class='r'>" +
-      (p.link ? "<a class='betlink' href='" + esc(p.link) + "' target='_blank' rel='noopener'>Bet</a>" : "") + "</td></tr>").join("") + "</tbody>"
+      "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm'>" + num(p.units, 2) + "</td></tr>").join("") + "</tbody>"
     : "<tbody><tr><td class='empty'>" + (withLines ? "No plays. No total is far enough from the model." : "No lines posted yet. Openers usually post the night before.") + "</td></tr></tbody>";
 
   const Lz = D.games.filter((g) => g.spread_verdict === "LEAN");
   if (!Lz.length) $("leans-sec").hidden = true;
   else $("t-leans").innerHTML = "<thead><tr><th>Lean</th><th>Best number</th><th class='r'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Opened</th></tr></thead><tbody>" +
-    Lz.map((g) => "<tr><td><div class='b'>" + esc(g.spread_pick + " " + ln(g.spread_line)) + "</div><div class='f' style='font-size:12px'>" + esc(matchup(g)) + " · " + esc(tip(g)) + "</div></td><td>" +
+    Lz.map((g) => "<tr><td><div class='b pick'>" + logo(g[g.spread_side], 20) + esc(g.spread_pick + " " + ln(g.spread_line)) + "</div><div class='f' style='font-size:12px'>" + matchupL(g) + " · " + esc(tip(g)) + "</div></td><td>" +
       esc(g.spread_book) + (g.spread_odds != null ? " <span class='m'>" + esc(odds(g.spread_odds)) + "</span>" : "") + "</td><td class='r m'>" +
       ln(g.spread_side === "home" ? g.model_home_spread : -g.model_home_spread) + "</td><td class='r b'>" + sgn(g.spread_edge) + "</td><td class='r m hide-sm'>" +
       (g.open_home_spread == null ? "–" : ln(g.spread_side === "home" ? g.open_home_spread : -g.open_home_spread)) + "</td></tr>").join("") + "</tbody>";
@@ -244,14 +296,28 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const cell = (val, price, link, best) => val == null ? "<span class='na'>–</span>" :
     "<" + (link ? "a href='" + esc(link) + "' target='_blank' rel='noopener'" : "span") + " class='odd" + (best ? " best" : "") + "'>" + esc(val) +
     (price != null ? "<small>" + esc(odds(price)) + "</small>" : "") + "</" + (link ? "a" : "span") + ">";
+  // best number (then price) across books for one side, for the phone layout's single column
+  const best = (g, sd, i) => {
+    const pay = (o) => o == null ? -1 : (o > 0 ? o / 100 : 100 / -o);
+    let top = null;
+    for (const x of (g.book_lines || [])) {
+      let v, pr, txt;
+      if (market === "spread") { if (x.home_spread == null) continue; v = sd === "home" ? x.home_spread : -x.home_spread; pr = x[sd + "_spread_odds"]; txt = ln(v); }
+      else if (market === "total") { if (x.total == null) continue; const ou = i === 0 ? "over" : "under"; v = ou === "over" ? -x.total : x.total; pr = x[ou + "_odds"]; txt = ou[0] + num(x.total); }
+      else { pr = x[sd + "_ml"]; if (pr == null) continue; v = pay(pr); txt = odds(pr); }
+      const key = [v, pay(pr)];
+      if (!top || key[0] > top.key[0] || (key[0] === top.key[0] && key[1] > top.key[1])) top = {key, txt, pr, book: x.book};
+    }
+    return top ? esc(top.txt) + (market !== "ml" && top.pr != null ? " <span class='m'>" + esc(odds(top.pr)) + "</span>" : "") + "<small>" + esc(top.book) + "</small>" : "<span class='na'>–</span>";
+  };
   const board = () => {
     const only = $("only-plays").checked;
     const G = D.games.filter((g) => !only || g.total_verdict === "BET")
       .sort((a, b) => String(a.start).localeCompare(String(b.start)) || a.home.localeCompare(b.home));
     const mh = {spread: "Model", total: "Model", ml: "Win %"}[market];
-    let h = "<thead><tr><th>Time</th><th>Team</th><th class='r'>Proj</th><th class='r'>" + mh + "</th><th class='r hide-sm'>Open</th>" +
-      BOOKS.map((b) => "<th class='bk'>" + b + "</th>").join("") + "<th class='r'>Edge</th></tr></thead>";
-    if (!G.length) { $("t-board").innerHTML = h + "<tbody><tr><td class='empty' colspan='" + (BOOKS.length + 6) + "'>No games.</td></tr></tbody>"; return; }
+    let h = "<thead><tr><th class='tm'>Time</th><th>Team</th><th class='r pts'>Proj</th><th class='r'>" + mh + "</th><th class='r hide-sm hide-md'>Open</th>" +
+      BOOKS.map((b, j) => "<th class='bk" + (j >= 4 ? " bk-minor" : "") + "'>" + b + "</th>").join("") + "<th class='bestc'>Best</th><th class='r edge'>Edge</th></tr></thead>";
+    if (!G.length) { $("t-board").innerHTML = h + "<tbody><tr><td class='empty' colspan='" + (BOOKS.length + 7) + "'>No games.</td></tr></tbody>"; return; }
     h += G.map((g) => {
       const hasBet = market === "total" && g.total_verdict === "BET";
       const rows = ["away", "home"].map((sd, i) => {
@@ -282,8 +348,9 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
           bookCells = BOOKS.map((bk, j) => { const x = bl(g, bk); return x && x[sd + "_ml"] != null ? cell(odds(x[sd + "_ml"]), null, x[sd + "_ml_link"], prices[j] === top && ok.length > 1) : cell(null); });
         }
         return "<tr>" + (i === 0 ? "<td class='tm' rowspan='2'>" + esc(tip(g)) + "</td>" : "") +
-          "<td class='team'>" + (i === 1 && !g.neutral ? "<span class='f'>@ </span>" : "") + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td><td class='r m hide-sm'>" + open + "</td>" +
-          bookCells.map((c) => "<td class='bk'>" + c + "</td>").join("") + "<td class='r'>" + edge + "</td></tr>";
+          "<td class='team'>" + (i === 0 ? "<div class='tm-sm'>" + esc(tip(g)) + "</div>" : "") + (i === 1 && !g.neutral ? "<span class='f'>@ </span>" : "") +
+          logo(g[sd], 18) + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td><td class='r m hide-sm hide-md'>" + open + "</td>" +
+          bookCells.map((c, j) => "<td class='bk" + (j >= 4 ? " bk-minor" : "") + "'>" + c + "</td>").join("") + "<td class='bestc'>" + best(g, sd, i) + "</td><td class='r edge'>" + edge + "</td></tr>";
       }).join("");
       return "<tbody class='g" + (hasBet ? " has-bet" : "") + "'>" + rows + "</tbody>";
     }).join("");
@@ -298,12 +365,12 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const W = D.games.filter((g) => g.total_verdict === "WATCH");
   if (!W.length) $("watch-sec").hidden = true;
   else $("t-watch").innerHTML = "<thead><tr><th>Time</th><th>Game</th><th>Side</th><th class='r'>Now</th><th class='r'>Play at</th><th class='r'>Edge now</th></tr></thead><tbody>" +
-    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + esc(matchup(g)) + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
+    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + matchupL(g) + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
       "</td><td class='r'>" + num(playAt(g.total_good_to, g.total_pick === "Under")) + "</td><td class='r m'>" + sgn(g.total_edge) + "</td></tr>").join("") + "</tbody>";
 
   // Record
   if (st) {
-    $("rec-sec").hidden = false;
+    $("rec-sec").hidden = false; $("rec-btn").hidden = false;
     $("t-rec").innerHTML = "<thead><tr><th>Market</th><th class='r'>Record</th><th class='r'>Win %</th><th class='r'>Units</th><th class='r'>ROI</th><th class='r'>Avg CLV</th><th class='r'>Beat close</th><th class='r'>Open</th></tr></thead><tbody>" +
       Object.entries(st).map(([mk, s]) => "<tr><td>" + mk[0].toUpperCase() + mk.slice(1) + "</td><td class='r'>" + rec(s) + "</td><td class='r'>" + pct(s.win) + "</td><td class='r " +
         (s.units > 0 ? "pos" : s.units < 0 ? "neg" : "") + "'>" + sgn(s.units, 2) + "</td><td class='r'>" + pct(s.roi) + "</td><td class='r'>" + (s.clv_pts == null ? "–" : sgn(s.clv_pts, 2)) +
@@ -312,11 +379,13 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     if (R.length) {
       $("recent-sec").hidden = false;
       $("t-recent").innerHTML = "<thead><tr><th>Date</th><th>Game</th><th>Bet</th><th>Book</th><th class='r'>Close</th><th class='r'>CLV</th><th class='r'>Final</th><th class='r'>Result</th><th class='r'>Units</th></tr></thead><tbody>" +
-        R.map((x) => "<tr><td class='m'>" + esc(x.date) + "</td><td>" + esc(x.away + " @ " + x.home) + "</td><td class='b'>" + esc(x.pick) + (x.kind === "lean" ? " <span class='tag'>Lean</span>" : "") + "</td><td>" + esc(x.book || "–") +
+        R.map((x) => "<tr><td class='m'>" + esc(x.date) + "</td><td>" + logo(x.away, 14) + esc(x.away) + " @ " + logo(x.home, 14) + esc(x.home) + "</td><td class='b'>" + esc(x.pick) + (x.kind === "lean" ? " <span class='tag'>Lean</span>" : "") + "</td><td>" + esc(x.book || "–") +
           "</td><td class='r'>" + num(x.close_line) + "</td><td class='r'>" + sgn(x.clv_pts) + "</td><td class='r m'>" + esc(x.away_score) + "–" + esc(x.home_score) +
           "</td><td class='r b " + (x.result === "W" ? "pos" : x.result === "L" ? "neg" : "") + "'>" + esc(x.result) + "</td><td class='r'>" + sgn(x.profit, 2) + "</td></tr>").join("") + "</tbody>";
     }
   }
+
+  ["t-plays", "t-leans", "t-watch", "t-rec", "t-recent"].forEach(stack);
 
   // Ratings
   $("t-rat").innerHTML = "<thead><tr><th class='r'>#</th><th>Team</th><th class='r'>Net</th><th class='r'>Offense</th><th class='r'>Defense</th><th class='r'>Pace</th></tr></thead><tbody>" +
