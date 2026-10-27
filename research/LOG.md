@@ -255,3 +255,27 @@ All three seasons, phase 2 spec: spreads 3+ 54.1% (1,056 plays, interval 51.0-57
 * The model still has no information beyond the close (slopes about 0); the edge is at the opener only.
 * Totals plays still lean to overs (67-79% of plays), as in S1. Not corrected here; a candidate for the next
   round, to be judged on 2024-25 the same way.
+
+---
+
+## Entry 9 (2026-10-27): phase 3 plan (over lean, LUMA subskills), written before any phase-3 run
+
+**Diagnosis of the over lean** (phase 2 spec; selection seasons 2024-25 and earlier only): no overall bias at
+the start of the season (model minus opener about 0 from October to February), but +2.6 points in March, +5.1 in
+April and +8.2 in May (playoffs). Late-season and playoff games score less, and the model's scoring-environment
+input (season average so far) lags that. Bigger edges cluster late, hence the over lean.
+
+**Same rules as entry 6:** candidates in this order, starting from the phase 2 spec, each kept only if it
+lowers the 2024-25 miss (margin MAE for margin features, total MAE for total features). Win % and the over share
+of total plays are reported, not used to choose. 2026 is scored once, on the final spec. Note: 2026 was already
+scored once in entry 8, so it is no longer completely fresh; it has still never been used to choose anything.
+
+* P6 late season and playoffs: playoff/play-in flag; late-season ramp = (games played - 60) / 22, floored at 0,
+  regular season only. Both stages' margin and total.
+* P7 recent scoring environment: average total of the league's last 150 games before the date, minus the
+  season average so far (total only).
+* P8 LUMA subskills for totals: minutes-weighted sums over both teams of shooting, playmaking, ball security,
+  offensive rebounding (offense) and defensive rebounding and defense (defense), same availability rule as P1.
+* P9 the same six subskills as home-minus-away differences for the margin.
+* P10 three-point profile for totals: sums of offensive 3-point shot selection and making (O_sel_thr,
+  O_make_thr) and defensive 3-point selection allowed (D_sel_thr).
