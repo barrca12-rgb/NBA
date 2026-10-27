@@ -109,7 +109,7 @@ def fetch(schedule: pd.DataFrame) -> pd.DataFrame:
         for odd_id, (line_col, price_col, link_col) in ODDS.items():
             for bk, o in ((odds.get(odd_id) or {}).get("byBookmaker") or {}).items():
                 if o.get("available") is False:
-                    if bk in BOOKS or bk in ("1xbet", "fliff"):
+                    if bk in BOOKS:              # only the books we bet
                         r = off_board.setdefault(bk, {"book": BOOKS.get(bk, bk), "sgo_event": ev.get("eventID"),
                                                       "start": st.get("startsAt"), "home_id": h, "away_id": a})
                         r[price_col] = _num(o.get("odds"))
