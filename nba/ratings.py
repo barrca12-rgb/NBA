@@ -22,6 +22,8 @@ class RatingConfig:
     pace_prior_games: float = 10.0
     carry: float = 0.6              # share of last season's final rating kept in the prior
     hca_prior: float = 1.5          # home edge per side, points per 100 possessions (~3 pts/game margin)
+    pace_half_life: float | None = None   # separate decay for pace (default: half_life)
+    ppp_col: str = "ppp"            # "ppp_luck" regresses 3-point luck
 
 
 def _solve(X, y, w, lam, beta0):
@@ -54,7 +56,7 @@ def fit(tg: pd.DataFrame, asof, teams: list[int], prior: pd.DataFrame | None, cf
         X[:, 1] = h["venue"].to_numpy()
         X[rows, 2 + ti] = 1.0
         X[rows, 2 + k + oi] = -1.0
-        y = h["ppp"].to_numpy(float)
+        y = h[cfg.ppp_col].to_numpy(float)
         lam = np.full(2 + 2 * k, cfg.prior_games * wbar)
         lam[0] = 1e-6
         lam[1] = 20 * wbar
@@ -64,6 +66,9 @@ def fit(tg: pd.DataFrame, asof, teams: list[int], prior: pd.DataFrame | None, cf
         P[:, 0] = 1.0
         P[rows, 1 + ti] += 1.0
         P[rows, 1 + oi] += 1.0
+        if cfg.pace_half_life:
+            w = 0.5 ** ((asof - h["date"]).dt.days.to_numpy() / cfg.pace_half_life)
+            wbar = w.mean()
         yp = h["pace"].to_numpy(float)
         lamp = np.full(1 + k, cfg.pace_prior_games * wbar)
         lamp[0] = 1e-6

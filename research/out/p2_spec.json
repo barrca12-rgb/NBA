@@ -1,0 +1,48 @@
+{
+ "cfg": {
+  "half_life": 30.0,
+  "prior_games": 10.0,
+  "pace_prior_games": 10.0,
+  "carry": 0.5,
+  "hca_prior": 1.5,
+  "pace_half_life": 15.0,
+  "ppp_col": "ppp_luck"
+ },
+ "margin": [
+  "pred_margin",
+  "pred_margin_x_early",
+  "venue",
+  "home_b2b",
+  "away_b2b",
+  "rest_diff",
+  "avail_diff",
+  "avail_diff_x_early",
+  "miss_diff",
+  "fatigue_3in4_diff",
+  "g7_diff",
+  "tz_diff",
+  "altitude"
+ ],
+ "total": [
+  "pred_total",
+  "pred_total_x_early",
+  "season_avg_total",
+  "b2b_sum",
+  "rest_sum",
+  "avail_O_sum",
+  "avail_D_sum",
+  "miss_O_sum",
+  "miss_D_sum",
+  "fatigue_3in4_sum",
+  "g7_sum",
+  "tz_sum",
+  "altitude"
+ ],
+ "walk_forward": {},
+ "adopted": [
+  "P1 player strength",
+  "P2 3-point luck regressed",
+  "P3 fatigue, travel, altitude",
+  "P5 pace half-life 15 days"
+ ]
+}

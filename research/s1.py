@@ -63,13 +63,17 @@ def build(cfg: ratings.RatingConfig, mf=model.MARGIN_FEATURES, tf=model.TOTAL_FE
 
 
 def report(w: pd.DataFrame, title: str) -> tuple[str, dict]:
+    return report_parts(w, title, {"development 2014-2024": DEV, "holdout 2025-2026": HOLD})
+
+
+def report_parts(w: pd.DataFrame, title: str, seasons: dict) -> tuple[str, dict]:
     sus = suspect(w)
     ws = w.copy()
     ws.loc[sus, ["open_home_spread"]] = np.nan
     md = [f"# {title}", "", f"Suspect spread records excluded (opener favors the other team from the model by 10+): "
           f"{int(sus.sum())} ({', '.join(f'{s}: {n}' for s, n in sus.groupby(w['season']).sum().items() if n)}).", ""]
     res = {}
-    parts = {"development 2014-2024": w["season"].isin(DEV), "holdout 2025-2026": w["season"].isin(HOLD)}
+    parts = {k: w["season"].isin(v) for k, v in seasons.items()}
     md += ["## 1. Accuracy vs the closing line", "", "| sample | games | model margin MAE | close margin MAE | "
            "model total MAE | close total MAE |", "|---|---:|---:|---:|---:|---:|"]
     for k, m in parts.items():
@@ -90,8 +94,7 @@ def report(w: pd.DataFrame, title: str) -> tuple[str, dict]:
                 res[(market, e, k)] = c
                 md.append(f"| {market} | {e}+ | {k} | {c['plays']:,} | {c['win%']:.1%} | {c['ci lo']:.1%} - "
                           f"{c['ci hi']:.1%} | {c['roi%']:+.1f}% | {c['clv']:+.2f} |")
-    md += ["", "Opener scorecards use the seasons that have openers: development 2014-2017 and 2024; holdout 2025-2026.",
-           ""]
+    md += ["", "Opener scorecards use only seasons that have openers.", ""]
     return "\n".join(md), res
 
 

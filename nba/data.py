@@ -26,6 +26,7 @@ FILES = {
 }
 CACHE = os.path.join(os.path.dirname(__file__), "cache")
 TEAMS = set(range(1, 31))      # ESPN ids of the 30 franchises
+THREE_LUCK = 0.35
 FT_WEIGHT = 0.44               # free-throw weight in the possession estimate (Oliver; standard for the NBA)
 
 
@@ -71,6 +72,7 @@ def season_games(season: int, refresh: bool = False) -> tuple[pd.DataFrame, pd.D
         "game_id": b["game_id"].astype(int), "team_id": b["team_id"].astype(int),
         "opp_id": b["opponent_team_id"].astype(int), "pts": b["team_score"].astype(float),
         "fga": b["field_goals_attempted"], "fta": b["free_throws_attempted"],
+        "fg3m": b["three_point_field_goals_made"], "fg3a": b["three_point_field_goals_attempted"],
         # Turnovers include team turnovers (total_turnovers). 2018 lacks that field and 2012 double-counts it
         # (team_turnovers = turnovers); there player turnovers stand in (~1 per game short).
         "orb": b["offensive_rebounds"],
@@ -86,6 +88,10 @@ def season_games(season: int, refresh: bool = False) -> tuple[pd.DataFrame, pd.D
     minutes = 48 + 5 * (t["periods"].fillna(4) - 4).clip(lower=0)
     t["pace"] = t["poss"] * 48 / minutes
     t["ppp"] = 100 * t["pts"] / t["poss"]
+    # ppp with part of the 3-point luck removed (CBB THREE_LUCK): makes above/below the season's league 3P% on
+    # this team's attempts, of which `THREE_LUCK` is treated as noise. Used only when a spec asks for it.
+    p3 = t["fg3m"].sum() / t["fg3a"].sum()
+    t["ppp_luck"] = t["ppp"] - THREE_LUCK * 100 * 3 * (t["fg3m"] - t["fg3a"] * p3) / t["poss"]
     t["venue"] = np.where(t["neutral"], 0, np.where(t["team_id"] == t["home_id"], 1, -1))
     t = t[t["poss"] > 0].drop(columns=["home_id", "o_fga", "o_orb", "o_tov", "o_fta"])
     pace = t.groupby("game_id")["pace"].first()

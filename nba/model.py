@@ -89,7 +89,17 @@ def ridge(X, y, lam=1.0):
     return np.linalg.solve(X1.T @ X1 + np.diag(pen), X1.T @ y)
 
 
-def walk_forward(b: pd.DataFrame, first_train: int, mf=MARGIN_FEATURES, tf=TOTAL_FEATURES) -> pd.DataFrame:
+def ridge_w(X, y, w, lam=1.0):
+    X1 = np.column_stack([np.ones(len(X)), X])
+    pen = np.full(X1.shape[1], lam)
+    pen[0] = 0
+    W = w[:, None]
+    return np.linalg.solve(X1.T @ (X1 * W) + np.diag(pen), (X1 * W).T @ y)
+
+
+def walk_forward(b: pd.DataFrame, first_train: int, mf=MARGIN_FEATURES, tf=TOTAL_FEATURES,
+                 season_half_life: float | None = None) -> pd.DataFrame:
+    """season_half_life: weight earlier training seasons by 0.5^((s-1-season)/half_life) (CBB d_common)."""
     b = b.copy()
     b["final_margin"], b["final_total"] = np.nan, np.nan
     for s in sorted(b["season"].unique()):
@@ -97,8 +107,10 @@ def walk_forward(b: pd.DataFrame, first_train: int, mf=MARGIN_FEATURES, tf=TOTAL
         if not len(tr):
             continue
         te = b["season"] == s
-        cm = ridge(tr[mf].to_numpy(float), tr["margin"].to_numpy(float))
-        ct = ridge(tr[tf].to_numpy(float), tr["points"].to_numpy(float))
+        w = (np.ones(len(tr)) if season_half_life is None
+             else 0.5 ** ((s - 1 - tr["season"].to_numpy(float)) / season_half_life))
+        cm = ridge_w(tr[mf].to_numpy(float), tr["margin"].to_numpy(float), w)
+        ct = ridge_w(tr[tf].to_numpy(float), tr["points"].to_numpy(float), w)
         b.loc[te, "final_margin"] = cm[0] + b.loc[te, mf].to_numpy(float) @ cm[1:]
         b.loc[te, "final_total"] = ct[0] + b.loc[te, tf].to_numpy(float) @ ct[1:]
     return b

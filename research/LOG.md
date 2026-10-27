@@ -219,3 +219,39 @@ season (no previous game), the dressed list stands in (about 30 games a season).
 
 **Diagnostic only (not bettable at the open):** the same player strength from the dressed list, to show how much
 late injury news is worth.
+
+## Entry 7 (2026-10-27): phase 2 selection, seasons 2024-2025 only (`research/out/p2_select.md`)
+
+Base = S1 with stage 2 trained from 2014. Candidates added in the logged order, kept by the adoption rule
+(selection-season MAE), win % shown for information only.
+
+| spec | margin MAE | total MAE | spreads 3+ win % (plays) | CLV | totals 4+ win % (plays) | CLV | adopted |
+|---|---:|---:|---:|---:|---:|---:|---|
+| S1 base | 11.086 | 14.722 | 51.1% (884) | +0.68 | 54.6% (981) | +2.26 | base |
+| P1 player strength (LUMA ARC, last-game availability) | 10.989 | 14.688 | 52.0% (638) | +0.94 | 55.9% (953) | +2.43 | margin, total |
+| P2 3-point luck regressed | 10.952 | 14.620 | 53.2% (637) | +1.01 | 57.8% (928) | +2.60 | yes |
+| P3 fatigue, travel, altitude | 10.950 | 14.607 | 54.3% (661) | +0.97 | 57.0% (940) | +2.57 | margin, total |
+| P4 recent seasons weighted | 10.945 | 14.613 | 54.5% (683) | +0.93 | 56.8% (946) | +2.50 | no (total worse; sum worse) |
+| P5 pace half-life 15 days | 10.950 | 14.545 | 54.7% (666) | +0.97 | 56.8% (949) | +2.76 | yes |
+| diagnostic: dressed list (near tip, not bettable at the open) | 10.920 | 14.531 | 54.0% (635) | +1.42 | 57.1% (941) | +2.81 | n/a |
+
+Closing line on these games: margin 10.643, total 14.140. Player strength was the biggest single gain on
+margin. Knowing tonight's dressed list adds little on top (0.03 points of margin), so late injury news is not
+where most of the remaining gap to the close is.
+
+## Entry 8 (2026-10-27): phase 2 final spec and the one-time 2026 check (`research/out/p2_final.md`)
+
+Spec frozen in `research/out/p2_spec.json` (P1, P2, P3, P5). 2026 scored once.
+
+| | S1 2024 | P2 2024 | S1 2025 | P2 2025 | S1 2026 | **P2 2026 (check)** |
+|---|---:|---:|---:|---:|---:|---:|
+| Spreads 3+ at the opener | 47.1% (410) | 53.8% (288) | 54.3% (475) | 55.3% (378) | 51.3% (470) | **53.1% (390)** |
+| Totals 4+ at the opener | 50.4% (520) | 53.2% (476) | 59.6% (463) | 60.5% (473) | 52.5% (381) | **54.8% (383)** |
+
+All three seasons, phase 2 spec: spreads 3+ 54.1% (1,056 plays, interval 51.0-57.1%, CLV +0.74); totals 4+ 56.2%
+(1,332 plays, 53.5-58.9%, CLV +2.58). 2026 alone: spreads 3+ interval 47.7-58.3%, totals 4+ 49.7-60.1%.
+
+* The gain held on the untouched check season for both markets (+1.8 and +2.3 points of win rate).
+* The model still has no information beyond the close (slopes about 0); the edge is at the opener only.
+* Totals plays still lean to overs (67-79% of plays), as in S1. Not corrected here; a candidate for the next
+  round, to be judged on 2024-25 the same way.
