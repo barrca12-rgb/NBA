@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Off The Glass · NBA Record</title>
+<meta property="og:title" content="Off The Glass · NBA Record">
+<meta name="description" content="Off The Glass: an NBA betting model. Every play logged at the posted number, graded in public.">
+<meta name="theme-color" content="#0A2C49">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:site_name" content="Off The Glass">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://barrca12-rgb.github.io/NBA/assets/otg-social.jpg">
+<meta property="og:description" content="NBA model: every play logged at the posted number, graded in public.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@OffTheGlassHQ">
+<meta name="twitter:image" content="https://barrca12-rgb.github.io/NBA/assets/otg-social.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root {
+  --bg: #fbf6ea; --surface: #ffffff; --sunken: #f7f0e1; --line: #ebe1cd; --line-strong: #d9cbb0;
+  --text: #0a2c49; --muted: #56627a; --faint: #8a93a3;
+  --accent: #b84a08; --pos: #0f7b4b; --pos-bg: #e6f4ed; --neg: #c2352b; --warn: #8a5a00; --warn-bg: #fbf0d9;
+  --brand: #fd6c0f; --bar: #0a2c49; --bar-text: #fbf6ea; --bar-muted: #b7c3d3;
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: "Graduate", "Rockwell", Georgia, serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #08090b; --surface: #12151a; --sunken: #181c22; --line: #242a33; --line-strong: #333b46;
+    --text: #f6eedd; --muted: #a8b0bc; --faint: #6f7886;
+    --accent: #ff8a3d; --pos: #3ccf8e; --pos-bg: #12301f; --neg: #ff6b5e; --warn: #f0b44a; --warn-bg: #33270f;
+    --brand: #fd6c0f; --bar: #000000; --bar-text: #f6eedd; --bar-muted: #9aa2ae;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box }
+.show-sm { display: none }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased }
+a { color: var(--accent); text-decoration: none } a:hover { text-decoration: underline }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px }
+
+/* Top bar */
+.top { background: var(--bar); border-bottom: 3px solid var(--brand); position: sticky; top: 0; z-index: 5 }
+.top .wrap { display: flex; align-items: center; gap: 22px; height: 58px }
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; color: var(--bar-text); text-decoration: none }
+.brand:hover { text-decoration: none }
+.brand img { width: 34px; height: 34px; border-radius: 7px; display: block }
+.wordmark { font-family: var(--display); font-size: 19px; letter-spacing: .02em; text-transform: uppercase; color: var(--bar-text); line-height: 1 }
+.tabs { display: flex; gap: 2px; height: 100% }
+.tabs a { display: flex; align-items: center; padding: 0 12px; color: var(--bar-muted); font-weight: 600; font-size: 13px; letter-spacing: .04em;
+  text-transform: uppercase; border-bottom: 3px solid transparent; margin-bottom: -3px; text-decoration: none }
+.tabs a[hidden] { display: none }
+.tabs a:hover { color: var(--bar-text); text-decoration: none }
+.tabs a[aria-current="page"] { color: var(--bar-text); border-bottom-color: var(--brand) }
+.status { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--bar-muted); font-size: 13px; min-width: 0 }
+.status a { color: var(--bar-text) }
+#upd-btn { background: transparent; color: var(--bar-text); border-color: rgba(251,246,234,.35) } #upd-btn:hover { background: rgba(251,246,234,.1) }
+.status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+button { font: inherit; font-weight: 600; font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: 6px; padding: 6px 12px; cursor: pointer } button:hover { background: var(--sunken) } button:disabled { opacity: .5; cursor: progress }
+
+/* Page head */
+.head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 24px 0 16px }
+h1 { font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: .01em; margin: 0; line-height: 1.15 }
+.sub { color: var(--muted); margin-top: 2px }
+.days { display: flex; gap: 4px; flex-wrap: wrap }
+.days a, .pagebtn { padding: 5px 12px; border-radius: 6px; color: var(--text); font-weight: 600; font-size: 13px; text-decoration: none;
+  border: 1px solid var(--line-strong); background: var(--surface); white-space: nowrap }
+.days a:hover, .pagebtn:hover { background: var(--sunken); text-decoration: none }
+.days a[aria-current="page"] { color: var(--surface); border-color: var(--text); background: var(--text) }
+.notice { border: 1px solid var(--line); background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 13px }
+
+/* KPI strip */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-top: 3px solid var(--text); border-radius: 10px; background: var(--surface); margin-bottom: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,44,73,.06) }
+.kpi { padding: 12px 16px; border-right: 1px solid var(--line) } .kpi:last-child { border-right: 0 }
+.kpi .k { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em } .kpi .v { font-size: 21px; font-weight: 800; margin-top: 3px; letter-spacing: -.01em }
+.kpi .v small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 4px }
+
+/* Panels and tables */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,44,73,.06) }
+.panel-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line) }
+.panel-h h2 { font-size: 13px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: .07em; display: flex; align-items: center; gap: 8px }
+.panel-h h2::before { content: ""; width: 4px; height: 14px; background: var(--brand); border-radius: 2px } .panel-h .note { color: var(--muted); font-size: 12px }
+.scroll { overflow-x: auto }
+table { width: 100%; border-collapse: collapse; font-size: 13px }
+th { text-align: left; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--sunken); white-space: nowrap }
+td { padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: middle }
+tbody tr:last-child td { border-bottom: 0 }
+.r { text-align: right } .c { text-align: center } .m { color: var(--muted) } .f { color: var(--faint) }
+.pos { color: var(--pos) } .neg { color: var(--neg) } .b { font-weight: 600 }
+.empty { padding: 28px 16px; color: var(--muted); text-align: center }
+.betlink { font-weight: 600; font-size: 12px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 10px; color: var(--text); display: inline-block }
+.betlink:hover { background: var(--sunken); text-decoration: none }
+.tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--muted) }
+.tag.bet { color: #fff; border-color: var(--brand); background: var(--brand) }
+
+/* Segmented control */
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 6px; overflow: hidden }
+.seg button { border: 0; border-radius: 0; padding: 5px 12px; color: var(--muted); font-weight: 500; background: transparent }
+.seg button + button { border-left: 1px solid var(--line-strong) }
+.seg button[aria-pressed="true"] { background: var(--text); color: var(--surface) }
+.ctrls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; cursor: pointer }
+
+/* Odds board: two rows per game (away, home) */
+.board td { padding-top: 6px; padding-bottom: 6px }
+.board tbody.g tr:first-child td { padding-top: 10px } .board tbody.g tr:last-child td { padding-bottom: 10px; border-bottom: 1px solid var(--line) }
+.board tbody.g tr:first-child td { border-bottom: 0 }
+.board tbody.g:last-child tr:last-child td { border-bottom: 0 }
+.board .team { font-weight: 500 }
+.inj { color: var(--warn); font-size: 11px; font-weight: 500; white-space: normal; max-width: 340px; margin-top: 1px } .board .tm { width: 72px; color: var(--muted); font-size: 12px }
+.board .pts { color: var(--muted); width: 40px }
+.odd { display: inline-flex; flex-direction: column; align-items: flex-end; min-width: 56px; padding: 3px 6px; border-radius: 6px; line-height: 1.25; color: var(--text); text-decoration: none }
+.odd small { color: var(--faint); font-size: 11px }
+a.odd:hover { background: var(--sunken); text-decoration: none }
+.odd.best { background: var(--pos-bg); color: var(--pos) } .odd.best small { color: var(--pos) }
+.na { color: var(--faint) }
+.board th.bk, .board td.bk { text-align: right; width: 84px; padding-left: 6px; padding-right: 6px }
+.board td.edge { white-space: normal; min-width: 110px; max-width: 170px } .tag { white-space: normal }
+.bestc { display: none; text-align: right } .tm-sm { display: none; color: var(--faint); font-size: 11px }
+@media (max-width: 1100px) { .bk-minor, .hide-md { display: none } .board .bestc { display: table-cell } }
+.bestc small { display: block; color: var(--faint); font-size: 11px }
+.board tbody.g.has-bet { background: linear-gradient(90deg, var(--brand) 0 3px, transparent 3px) }
+
+details.panel > summary { list-style: none; cursor: pointer; padding: 12px 16px; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between }
+details.panel > summary::after { content: "Show"; color: var(--accent); font-size: 13px; font-weight: 500 }
+details.panel[open] > summary::after { content: "Hide" }
+details.panel[open] > summary { border-bottom: 1px solid var(--line) }
+footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 80ch }
+.follow { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 700; color: var(--text) }
+.follow img { width: 22px; height: 22px; border-radius: 5px }
+.tl img { width: auto; vertical-align: -3px; margin-right: 5px; object-fit: contain }
+.pick .tl img { vertical-align: -5px; margin-right: 6px }
+.hero { display: block; height: 120px; width: auto; max-width: 100%; object-fit: contain; border-radius: 10px; margin-top: 18px; border: 1px solid var(--line) }
+@media (max-width: 720px) { .hero { height: auto; width: 100% } }
+
+@media (max-width: 860px) {
+  .top .wrap { gap: 10px } .status span { display: none }
+  .wordmark { display: none } .tabs a { padding: 0 8px; font-size: 12px }
+  h1 { font-size: 21px }
+  .kpi { border-right: 0; border-bottom: 1px solid var(--line) } .kpi:last-child { border-bottom: 0 }
+  .hide-sm { display: none } .show-sm { display: inline }
+  td, th { padding-left: 10px; padding-right: 10px }
+  #t-plays td:first-child, #t-leans td:first-child { white-space: normal; min-width: 150px }
+  .board .bk, .board .pts { display: none } .bestc { display: table-cell }
+  .board .tm { width: 52px; font-size: 11px } .board td.edge { min-width: 0; max-width: 104px }
+  .board td, .board th { padding-left: 6px; padding-right: 6px } .board .team { white-space: normal; min-width: 0 }
+  .board .tag { font-size: 10px; padding: 1px 4px } .board .tl img { width: 14px; height: 14px; margin-right: 4px }
+  .board .tm { display: none } .tm-sm { display: block } .board td.edge { max-width: 104px }
+  table.stack thead { display: none }
+  table.stack tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 12px; border-bottom: 1px solid var(--line) }
+  table.stack tbody tr:last-child { border-bottom: 0 }
+  table.stack td { display: block; border: 0; padding: 0; white-space: normal; text-align: left; min-width: 0 }
+  table.stack td:first-child { grid-column: 1 / -1; min-width: 0 }
+  table.stack td[data-l]::before { content: attr(data-l); display: block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--faint); margin-bottom: 1px }
+  table.stack td:first-child::before { display: none }
+  table.stack td.hide-sm, table.stack td:empty { display: none }
+  table.stack td.empty { grid-column: 1 / -1; text-align: center }
+}
+</style>
+<header class="top"><div class="wrap">
+  <a class="brand" href="./" aria-label="Off The Glass home"><img src="assets/otg-logo-512.png" alt="" width="34" height="34"><span class="wordmark">Off The Glass</span></a>
+  <nav class="tabs" aria-label="Sport"><a href="https://barrca12-rgb.github.io/NFL/">NFL</a><a href="./" aria-current="page">NBA</a><a href="https://barrca12-rgb.github.io/CBB/"><span class="hide-sm">College Basketball</span><span class="show-sm">CBB</span></a></nav>
+</div></header>
+<main class="wrap">
+  <img class="hero" src="assets/otg-banner.webp" alt="Off The Glass Hoops" width="2000" height="667">
+  <div class="head"><div><h1>NBA Record</h1>
+    <div class="sub">Every play at the logged number and price, graded against the final score. Updated Oct 27, 3:17 PM ET.</div></div><a class="pagebtn" href="./">&larr; Card</a></div>
+  <div class="kpis"><div class='kpi'><div class='k'>Record</div><div class='v'>0–0</div></div><div class='kpi'><div class='k'>Win %</div><div class='v'>–</div></div><div class='kpi'><div class='k'>Units</div><div class='v'>+0.00</div></div><div class='kpi'><div class='k'>ROI</div><div class='v'>–</div></div><div class='kpi'><div class='k'>Avg CLV</div><div class='v'>–</div></div><div class='kpi'><div class='k'>Open plays</div><div class='v'>2</div></div></div>
+  <section class="panel"><div class="panel-h"><h2>Summary</h2><span class="note">Settled plays. CLV = points the line moved our way from the logged number to the close. Break-even at -110 is 52.4%.</span></div>
+    <div class="scroll"><table><thead><tr><th>Bets</th><th class='r'>Record</th><th class='r'>Win %</th><th class='r'>Units</th><th class='r'>ROI</th><th class='r'>Avg CLV</th></tr></thead><tbody><tr><td class='b'>Totals (bets)</td><td class='r'>0–0</td><td class='r'>–</td><td class='r '>+0.00</td><td class='r'>–</td><td class='r'>–</td></tr><tr><td class='b'>Spread leans (tracked, not bet)</td><td class='r'>0–0</td><td class='r'>–</td><td class='r '>+0.00</td><td class='r'>–</td><td class='r'>–</td></tr></tbody></table></div></section>
+  
+  <section class="panel"><div class="panel-h"><h2>Bets placed</h2><span class="note">Totals, newest first.</span></div>
+    <div class="scroll"><table><thead><tr><th>Date</th><th>Game</th><th>Play</th><th>Book</th><th class='r'>Edge</th><th class='r'>Close</th><th class='r'>CLV</th><th>Result</th><th class='r'>Units</th></tr></thead><tbody><tr><td class='m'>Oct 28</td><td><picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/phi.png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/phi.png' alt='' loading='lazy' width='16' height='16' onerror="this.closest('picture').remove()"></picture>PHI @ <picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/ind.png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/ind.png' alt='' loading='lazy' width='16' height='16' onerror="this.closest('picture').remove()"></picture>IND</td><td class='b'>Under 239.5</td><td>DraftKings <span class='m'>-108</span></td><td class='r'>10.5</td><td class='r'>–</td><td class='r'>–</td><td>Open</td><td class='r'>–</td></tr><tr><td class='m'>Oct 27</td><td><picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/por.png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/por.png' alt='' loading='lazy' width='16' height='16' onerror="this.closest('picture').remove()"></picture>POR @ <picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/lal.png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/lal.png' alt='' loading='lazy' width='16' height='16' onerror="this.closest('picture').remove()"></picture>LAL</td><td class='b'>Under 234.5</td><td>FanDuel <span class='m'>-115</span></td><td class='r'>5.9</td><td class='r'>–</td><td class='r'>–</td><td>Open</td><td class='r'>–</td></tr></tbody></table></div></section>
+  <section class="panel"><div class="panel-h"><h2>Spread leans</h2><span class="note">Tracked, not bet: the backtest edge on spreads is too thin to stake yet.</span></div>
+    <div class="scroll"><table><thead><tr><th>Date</th><th>Game</th><th>Play</th><th>Book</th><th class='r'>Edge</th><th class='r'>Close</th><th class='r'>CLV</th><th>Result</th><th class='r'>Units</th></tr></thead><tbody><tr><td class='m'>Oct 27</td><td><picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/det.png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/det.png' alt='' loading='lazy' width='16' height='16' onerror="this.closest('picture').remove()"></picture>DET @ <picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/ny.png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/ny.png' alt='' loading='lazy' width='16' height='16' onerror="this.closest('picture').remove()"></picture>NY</td><td class='b'><picture class='tl'><source media='(prefers-color-scheme: dark)' srcset='https://a.espncdn.com/i/teamlogos/nba/500-dark/det.png'><img src='https://a.espncdn.com/i/teamlogos/nba/500/det.png' alt='' loading='lazy' width='16' height='16' onerror="this.closest('picture').remove()"></picture>DET +4.5</td><td>FanDuel <span class='m'>-110</span></td><td class='r'>5.4</td><td class='r'>–</td><td class='r'>–</td><td>Open</td><td class='r'>–</td></tr></tbody></table></div></section>
+  <footer>
+    <div><a class="follow" href="https://x.com/OffTheGlassHQ" target="_blank" rel="noopener"><img src="assets/otg-logo-512.png" alt="">Follow @OffTheGlassHQ on X for every play</a></div></footer>
+</main>
+<script>
+// phones: each table row becomes a small card, each cell labeled with its column header (styles in report_html)
+document.querySelectorAll("main table").forEach((t) => {
+  const hs = [...t.querySelectorAll("thead th")].map((h) => h.textContent.trim());
+  t.classList.add("stack");
+  t.querySelectorAll("tbody tr").forEach((r) => [...r.children].forEach((c, k) => { if (hs[k]) c.dataset.l = hs[k]; }));
+});
+</script>
+</html>

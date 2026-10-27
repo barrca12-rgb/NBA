@@ -234,7 +234,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
 <main class="wrap">
   <div class="head">
     <div><h1 id="h1"></h1><div class="sub" id="sub"></div></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><nav class="days" id="days" aria-label="Days"></nav><a class="pagebtn" id="rec-btn" href="#rec-sec" hidden>Record</a></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><nav class="days" id="days" aria-label="Days"></nav><a class="pagebtn" href="record.html">Record</a></div>
   </div>
 
   <div class="notice" id="stale" hidden>Live lines unavailable on the last update (SportsGameOdds). Lines shown are the last ones stored; no new plays were logged.</div>
@@ -430,7 +430,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
 
   // Record
   if (st) {
-    $("rec-sec").hidden = false; $("rec-btn").hidden = false;
+    $("rec-sec").hidden = false;
     $("t-rec").innerHTML = "<thead><tr><th>Market</th><th class='r'>Record</th><th class='r'>Win %</th><th class='r'>Units</th><th class='r'>ROI</th><th class='r'>Avg CLV</th><th class='r'>Beat close</th><th class='r'>Open</th></tr></thead><tbody>" +
       Object.entries(st).map(([mk, s]) => "<tr><td>" + mk[0].toUpperCase() + mk.slice(1) + "</td><td class='r'>" + rec(s) + "</td><td class='r'>" + pct(s.win) + "</td><td class='r " +
         (s.units > 0 ? "pos" : s.units < 0 ? "neg" : "") + "'>" + sgn(s.units, 2) + "</td><td class='r'>" + pct(s.roi) + "</td><td class='r'>" + (s.clv_pts == null ? "–" : sgn(s.clv_pts, 2)) +

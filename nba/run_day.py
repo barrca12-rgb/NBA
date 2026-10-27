@@ -14,7 +14,7 @@ import os
 
 import pandas as pd
 
-from . import card, data, live, odds, record, report_html
+from . import card, data, live, odds, record, record_page, report_html
 
 REPORTS = os.path.join(os.path.dirname(__file__), "..", "reports")
 
@@ -70,6 +70,10 @@ def main():
     have = sorted(f[4:14] for f in os.listdir(REPORTS) if f.startswith("nba_") and f.endswith(".html"))
     with open(os.path.join(REPORTS, "days.json"), "w") as f:
         json.dump({"days": have, "current": f"{today:%Y-%m-%d}" if f"{today:%Y-%m-%d}" in have else have[-1]}, f)
+    try:
+        record_page.write()
+    except Exception as e:   # the record page never stops the card
+        print(f"Record page failed ({e}); continuing.", flush=True)
 
 
 if __name__ == "__main__":
