@@ -342,3 +342,31 @@ look; still never used to choose).
   margin and hurt the total, so it was dropped as a shared change).
 * M5 recent form: each team's average (result minus model margin) over its last 10 games, shrunk by 10 games,
   home minus away.
+
+## Entry 13 (2026-10-27): phase 4 results, spreads (`research/out/p4_select.md`, `p4_final.md`)
+
+Selection, 2024-25 (adoption by margin MAE):
+
+| spec | margin MAE | spreads 3+ win % (plays) | CLV | adopted |
+|---|---:|---:|---:|---|
+| phase 3 spec | 10.943 | 54.8% (673) | +0.90 | base |
+| M1 roster-adjusted ratings c=0.5 | 10.977 | 55.3% (725) | +0.87 | no |
+| M1 roster-adjusted ratings c=1.0 | 11.035 | 53.1% (794) | +0.69 | no |
+| M2 team-specific home court | 10.940 | 54.5% (683) | +0.89 | yes |
+| M3 blowouts count half | 10.944 | 55.5% (679) | +0.91 | no |
+| M4 margin model weights recent seasons | 10.927 | 55.7% (731) | +0.94 | yes |
+| M5 recent form | 10.930 | 55.3% (714) | +0.93 | no |
+
+Final spec (phase 3 + M2 + M4; `research/out/p4_spec.json`), at the opener:
+
+| spreads 3+ | 2024 | 2025 | **2026 (check)** | all three |
+|---|---:|---:|---:|---:|
+| phase 3 spec | 54.0% (287) | 55.4% (386) | 53.8% (381) | 54.5% (1,054) |
+| phase 4 spec | 56.1% (310) | 55.3% (421) | **53.4% (384)**, 48.5-58.2% | 54.9% (1,115), 52.1-57.7% |
+
+* The margin gains were tiny (0.016 points of MAE) and did not carry to the check season: 2026 spreads 3+ went
+  from 53.8% to 53.4%. **Spreads are not meaningfully improved by phase 4.** Totals unchanged (58.9% in 2026).
+* Roster-adjusting the ratings for who played made margins worse, not better. The player-strength inputs from
+  phase 2 already carry the availability signal.
+* The model's margin miss (10.93) is still 0.3 points behind the closing line (10.64); the remaining spread edge
+  vs the opener is small (about 53-56% at 3+, interval lower bounds near 50% in any one season).

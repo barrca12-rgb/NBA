@@ -126,7 +126,9 @@ def strength(seasons, games: pd.DataFrame) -> pd.DataFrame:
             rows.append(m.reset_index())
     us = pd.concat(rows).merge(tg[["game_id", "team_id", "season", "n"]], on=["team_id", "season", "n"])
     usual = agg(us, us["w"], "usual")
-    out = dressed.join(avail, how="left").join(usual, how="left")
+    # played: who actually played, by actual minutes (known only after the game; used to fit past games only)
+    played = agg(b[b["minutes"] > 0], b.loc[b["minutes"] > 0, "minutes"], "played")
+    out = dressed.join(avail, how="left").join(usual, how="left").join(played, how="left")
     # first game of a season (no previous game): the dressed list stands in
     for tag in ("avail", "usual"):
         for c in COLS + ["rated"]:

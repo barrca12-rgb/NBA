@@ -27,9 +27,12 @@ def _games(seasons):
     return g, t.drop(columns="nn")
 
 
-def stage1(cfg: ratings.RatingConfig, first: int, last: int) -> pd.DataFrame:
-    """Ratings-only predictions for seasons first..last. Season first-1 is loaded only for the prior."""
+def stage1(cfg: ratings.RatingConfig, first: int, last: int, hook=None) -> pd.DataFrame:
+    """Ratings-only predictions for seasons first..last. Season first-1 is loaded only for the prior. hook(g, t)
+    may return a modified team_games frame (e.g. an adjusted target column or per-game weights)."""
     g, t = _games(range(first - 1, last + 1))
+    if hook is not None:
+        t = hook(g, t)
     teams = sorted(data.TEAMS)
     out = []
     prev = t[t["season"] == first - 1]
@@ -98,7 +101,7 @@ def ridge_w(X, y, w, lam=1.0):
 
 
 def walk_forward(b: pd.DataFrame, first_train: int, mf=MARGIN_FEATURES, tf=TOTAL_FEATURES,
-                 season_half_life: float | None = None) -> pd.DataFrame:
+                 season_half_life: float | None = None, margin_half_life: float | None = None) -> pd.DataFrame:
     """season_half_life: weight earlier training seasons by 0.5^((s-1-season)/half_life) (CBB d_common)."""
     b = b.copy()
     b["final_margin"], b["final_total"] = np.nan, np.nan
@@ -109,7 +112,8 @@ def walk_forward(b: pd.DataFrame, first_train: int, mf=MARGIN_FEATURES, tf=TOTAL
         te = b["season"] == s
         w = (np.ones(len(tr)) if season_half_life is None
              else 0.5 ** ((s - 1 - tr["season"].to_numpy(float)) / season_half_life))
-        cm = ridge_w(tr[mf].to_numpy(float), tr["margin"].to_numpy(float), w)
+        wm = w if margin_half_life is None else 0.5 ** ((s - 1 - tr["season"].to_numpy(float)) / margin_half_life)
+        cm = ridge_w(tr[mf].to_numpy(float), tr["margin"].to_numpy(float), wm)
         ct = ridge_w(tr[tf].to_numpy(float), tr["points"].to_numpy(float), w)
         b.loc[te, "final_margin"] = cm[0] + b.loc[te, mf].to_numpy(float) @ cm[1:]
         b.loc[te, "final_total"] = ct[0] + b.loc[te, tf].to_numpy(float) @ ct[1:]
