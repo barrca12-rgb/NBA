@@ -246,15 +246,10 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     <div class="scroll"><table id="t-plays"></table></div>
   </section>
 
-  <section class="panel" aria-labelledby="leans-h" id="leans-sec">
-    <div class="panel-h"><h2 id="leans-h">Spread leans</h2><span class="note">Spread edge 3+ pts. Tracked, not bet: the backtest edge on spreads (about 55% at the opener) is too thin to stake yet.</span></div>
-    <div class="scroll"><table id="t-leans"></table></div>
-  </section>
-
   <section class="panel" aria-labelledby="board-h">
     <div class="panel-h"><h2 id="board-h">Odds board</h2>
       <div class="ctrls">
-        <div class="seg" role="group" aria-label="Market"><button data-m="total" aria-pressed="true">Total</button><button data-m="spread">Spread</button><button data-m="ml">Moneyline</button></div>
+        <div class="seg" role="group" aria-label="Market"><button data-m="spread">Spread</button><button data-m="total" aria-pressed="true">Total</button><button data-m="ml">Moneyline</button></div>
         <label class="chk"><input type="checkbox" id="only-plays"> Plays only</label>
       </div>
     </div>
@@ -272,6 +267,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   </section>
 
   <details class="panel" id="recent-sec" hidden><summary>Recent results</summary><div class="scroll"><table id="t-recent"></table></div></details>
+  <details class="panel" id="leans-sec"><summary>Spread leans (tracked, not bet)</summary><div class="scroll"><table id="t-leans"></table></div></details>
   <details class="panel"><summary>Power ratings</summary><div class="scroll"><table id="t-rat"></table></div></details>
 
   <footer>
@@ -320,16 +316,22 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     link: g.total_link, edge: g.total_edge, p: g.total_p, ev: g.total_ev, model: num(g.model_total), to: num(playAt(g.total_good_to, g.total_pick === "Under")),
     open: g.open_total == null ? null : num(g.open_total), units: g.total_units}));
   P.sort((a, b) => String(a.g.start).localeCompare(String(b.g.start)) || b.edge - a.edge);
+  // other books' totals for the play's side, best first (same "Also:" line as the CBB card)
+  const also = (g) => { const ou = String(g.total_pick || "").toLowerCase(); const pay = (o) => o == null ? -1 : (o > 0 ? o / 100 : 100 / -o);
+    const L = (g.book_lines || []).filter((x) => x.total != null && x.book !== g.total_book).map((x) => ({book: x.book, key: ou === "over" ? -x.total : x.total, total: x.total, price: x[ou + "_odds"]}))
+      .sort((p, q) => q.key - p.key || pay(q.price) - pay(p.price));
+    return L.length ? "Also: " + L.map((x) => x.book + " " + ou[0] + num(x.total) + (x.price != null ? " (" + odds(x.price) + ")" : "")).join(" · ") : ""; };
   const rest = (g) => "Rest " + (g.away_rest == null ? "–" : Math.min(g.away_rest, 7) + "d") + " / " + (g.home_rest == null ? "–" : Math.min(g.home_rest, 7) + "d");
   const missing = (g) => ["away", "home"].map((sd) => { const u = g[sd + "_usual_net"], a = g[sd + "_avail_net"];
     return u != null && a != null && u - a > 1 ? g[sd] + " short-handed in last game (" + sgn(a - u) + " ARC)" : ""; }).filter(Boolean).join(" · ");
-  $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm'>Opened</th><th class='r hide-sm'>Units</th></tr></thead><tbody>" +
+  $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm hide-md'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm hide-md'>Opened</th><th class='r hide-sm hide-md'>Units</th></tr></thead><tbody>" +
     P.map((p) => "<tr><td><div class='b pick'>" + esc(p.bet) + "</div><div class='f' style='font-size:12px'>" + matchupL(p.g) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
+      (also(p.g) ? "<div class='f' style='font-size:12px'>" + esc(also(p.g)) + "</div>" : "") +
       (missing(p.g) ? "<div class='inj'>" + esc(missing(p.g)) + "</div>" : "") +
       (p.g.total_warn ? "<div class='inj'>&#9888; " + esc(p.g.total_warn) + "</div>" : "") + "</td><td>" +
-      esc(p.book || "–") + (p.price != null ? " <span class='m'>" + esc(odds(p.price)) + "</span>" : "") + "</td><td class='r m hide-sm'>" + esc(p.model) + "</td><td class='r pos b'>" + sgn(p.edge) +
+      esc(p.book || "–") + (p.price != null ? " <span class='m'>" + esc(odds(p.price)) + "</span>" : "") + "</td><td class='r m hide-sm hide-md'>" + esc(p.model) + "</td><td class='r pos b'>" + sgn(p.edge) +
       "</td><td class='r m hide-sm'>" + pct(p.p) + "</td><td class='r'>" + (p.ev == null ? "–" : sgn(100 * p.ev) + "%") +
-      "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm'>" + num(p.units, 2) + "</td></tr>").join("") + "</tbody>"
+      "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm hide-md'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm hide-md'>" + num(p.units, 2) + "</td></tr>").join("") + "</tbody>"
     : "<tbody><tr><td class='empty'>" + (withLines ? "No plays. No total is far enough from the model." : "No lines posted yet. Openers usually post the night before.") + "</td></tr></tbody>";
 
   const Lz = D.games.filter((g) => g.spread_verdict === "LEAN");
@@ -346,9 +348,9 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const T = st && st.totals, S = st && st["spread leans"];
   const kp = [["Plays today", P.length + "<small>" + P.length + "u</small>"],
     ["Totals", rec(T) + "<small>" + (T && T.win != null ? pct(T.win) : "") + "</small>"],
+    ["Spread leans", rec(S) + "<small>" + (S && S.win != null ? pct(S.win) : "") + "</small>"],
     ["Units", "<span class='" + (T && T.units > 0 ? "pos" : T && T.units < 0 ? "neg" : "") + "'>" + sgn(T ? T.units : 0, 2) + "</span>"],
-    ["Avg CLV", T && T.clv_pts != null ? sgn(T.clv_pts, 2) + "<small>pts</small>" : "–"],
-    ["Spread leans", rec(S) + "<small>" + (S && S.win != null ? pct(S.win) : "") + "</small>"]];
+    ["Avg CLV", T && T.clv_pts != null ? sgn(T.clv_pts, 2) + "<small>pts</small>" : "–"]];
   $("kpis").innerHTML = kp.map(([k, v]) => "<div class='kpi'><div class='k'>" + k + "</div><div class='v'>" + v + "</div></div>").join("");
 
   // Odds board
@@ -375,17 +377,16 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     const G = D.games.filter((g) => !only || g.total_verdict === "BET")
       .sort((a, b) => String(a.start).localeCompare(String(b.start)) || a.home.localeCompare(b.home));
     const mh = {spread: "Model", total: "Model", ml: "Win %"}[market];
-    let h = "<thead><tr><th class='tm'>Time</th><th>Team</th><th class='r pts'>Proj</th><th class='r'>" + mh + "</th><th class='r hide-sm hide-md'>Open</th>" +
+    let h = "<thead><tr><th class='tm'>Time</th><th>Team</th><th class='r pts'>Proj</th><th class='r'>" + mh + "</th>" +
       BOOKS.map((b, j) => "<th class='bk" + (j >= 4 ? " bk-minor" : "") + "'>" + b + "</th>").join("") + "<th class='bestc'>Best</th><th class='r edge'>Edge</th></tr></thead>";
-    if (!G.length) { $("t-board").innerHTML = h + "<tbody><tr><td class='empty' colspan='" + (BOOKS.length + 7) + "'>No games.</td></tr></tbody>"; return; }
+    if (!G.length) { $("t-board").innerHTML = h + "<tbody><tr><td class='empty' colspan='" + (BOOKS.length + 6) + "'>No games.</td></tr></tbody>"; return; }
     h += G.map((g) => {
       const hasBet = market === "total" && g.total_verdict === "BET";
       const rows = ["away", "home"].map((sd, i) => {
         const pts = g["model_" + sd + "_pts"] == null ? "–" : Math.round(g["model_" + sd + "_pts"]);
-        let model, open = "", bookCells, edge = "";
+        let model, bookCells, edge = "";
         if (market === "spread") {
           model = ln(sd === "home" ? g.model_home_spread : -g.model_home_spread);
-          open = g.open_home_spread == null ? "–" : ln(sd === "home" ? g.open_home_spread : -g.open_home_spread);
           const pick = g.spread_side === sd && g.spread_verdict === "LEAN";
           bookCells = BOOKS.map((bk) => { const x = bl(g, bk); if (!x || x.home_spread == null) return cell(null);
             const v = sd === "home" ? x.home_spread : -x.home_spread;
@@ -394,7 +395,6 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
         } else if (market === "total") {
           const ou = i === 0 ? "over" : "under";
           model = i === 0 ? num(g.model_total) : "";
-          open = i === 0 ? num(g.open_total) : "";
           const pick = (g.total_pick || "").toLowerCase() === ou && ["BET", "WATCH"].includes(g.total_verdict);
           bookCells = BOOKS.map((bk) => { const x = bl(g, bk); if (!x || x.total == null) return cell(null);
             return cell((i === 0 ? "o" : "u") + num(x.total), x[ou + "_odds"], x[ou + "_link"], pick && g.total_book === bk && x.total === g.total_line); });
@@ -409,7 +409,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
         }
         return "<tr>" + (i === 0 ? "<td class='tm' rowspan='2'>" + esc(tip(g)) + "</td>" : "") +
           "<td class='team'>" + (i === 0 ? "<div class='tm-sm'>" + esc(tip(g)) + "</div>" : "") + (i === 1 && !g.neutral ? "<span class='f'>@ </span>" : "") +
-          logo(g[sd], 18) + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td><td class='r m hide-sm hide-md'>" + open + "</td>" +
+          logo(g[sd], 18) + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td>" +
           bookCells.map((c, j) => "<td class='bk" + (j >= 4 ? " bk-minor" : "") + "'>" + c + "</td>").join("") + "<td class='bestc'>" + best(g, sd, i) + "</td><td class='r edge'>" + edge + "</td></tr>";
       }).join("");
       return "<tbody class='g" + (hasBet ? " has-bet" : "") + "'>" + rows + "</tbody>";
