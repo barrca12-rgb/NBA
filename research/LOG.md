@@ -321,3 +321,24 @@ spec (its second look overall; never used to choose).
 * Still no information beyond the close (slopes 0.06 total, -0.02 margin, both well inside 1 se of 0).
 * Caution (CBB lesson): results near 60% in a backtest deserve suspicion. Openers in 2025-26 come from single
   books, and nothing here verifies opener timing, limits or fills.
+
+---
+
+## Entry 12 (2026-10-27): phase 4 plan (spreads), written before any phase-4 run
+
+Starting point: phase 3 spec. Same rules: candidates in this order, each kept only if it lowers the 2024-25
+**margin** MAE; win % at the opener reported, not used to choose; 2026 scored once on the final spec (its third
+look; still never used to choose).
+
+* M1 roster-adjusted ratings: before stage 1 fits a past game, its points per 100 are adjusted for who actually
+  played: minus c x (the team's played offensive ARC minus its season-to-date typical), plus c x (the opponent's
+  played defensive ARC minus its typical). Ratings then describe each team at its usual strength, and tonight's
+  availability (P1 inputs) does the rest. c from {0.5, 1.0} by 2024-25 margin MAE. Played ARC uses past box
+  scores only (after those games), so nothing leaks into a prediction.
+* M2 team-specific home court: each team's home-minus-road residual vs the ratings over the three previous
+  seasons, shrunk with 60 games of prior (CBB `team_hca_table`).
+* M3 blowout down-weighting in stage 1: games decided by 20+ points count half (garbage time).
+* M4 recent seasons weighted more in stage 2, margin model only (season half-life 3; in phase 2 this helped the
+  margin and hurt the total, so it was dropped as a shared change).
+* M5 recent form: each team's average (result minus model margin) over its last 10 games, shrunk by 10 games,
+  home minus away.
