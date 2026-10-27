@@ -125,3 +125,53 @@ The NBA idea **passes** if, for spreads at 3+ **or** totals at 4+, all of these 
 Otherwise the NBA idea is **killed**, and that is said plainly. If it passes: stop and report; no live card.
 
 Any further specification after S1 is exploratory, logged below, and cannot change the verdict.
+
+---
+
+## Entry 3 (2026-10-27): stage-1 grid (development results only, no lines)
+
+18 configurations, ratings-only predictions, development seasons 2014-2024, criterion margin MAE + total MAE
+(`research/out/s1_grid.csv`). Best: **half_life 30 days, prior_games 10, carry 0.5** (margin 10.27, total 14.48).
+All 18 were within 0.22 points of each other on the criterion; the choice barely matters. Frozen in
+`research/out/s1_config.json`.
+
+## Entry 4 (2026-10-27): S1 result, the pre-registered run (`research/out/s1.md`)
+
+Run once with the frozen configuration. 34 spread plays excluded as suspect records (13 of them in 2025).
+
+| | development | holdout |
+|---|---:|---:|
+| Margin miss, model / close | 10.24 / 9.87 | 11.27 / 10.82 |
+| Total miss, model / close | 14.46 / 14.06 | 14.77 / 14.33 |
+| Beyond the close, margin slope (se) | 0.011 (0.034) | -0.015 (0.067) |
+| Beyond the close, total slope (se) | -0.065 (0.039) | -0.046 (0.077) |
+| Spreads 3+ at the opener: win %, plays, CLV | 49.5%, 1,654, +0.54 | 52.8% (49.3-56.1), 945, +0.66 |
+| **Totals 4+ at the opener: win %, plays, CLV** | **53.2%, 1,614, +1.65** | **56.4% (52.9-59.7), 844, +2.49** |
+
+Pass rule:
+* spreads at 3+: development 49.5% (below 52.4%) and holdout interval low 49.3% -> **fail**
+* totals at 4+: development 53.2% > 52.4%, holdout 56.4% > 52.4%, holdout interval low 52.9% > 50%, CLV +1.65
+  and +2.49 -> **pass**
+
+**Verdict under the pre-registered rule: PASS (totals only).** Per the plan, stop here; no live card.
+
+## Entry 5 (2026-10-27): exploratory checks on the totals pass (`research/out/s1_checks.md`)
+
+Not pre-registered; cannot change the verdict. They say how much weight it deserves.
+
+* **The holdout pass leans on one season.** Totals 4+ by season: 2014 53.8%, 2015 55.1%, 2016 53.0%,
+  2017 56.6%, 2024 **50.4%**, 2025 **59.6%** (CLV +3.56), 2026 **52.5%** (CLV +1.19). 2026 on its own is
+  break-even at -110.
+* **It looks like a "soft opener" effect.** The winning seasons have a single opening source (ESPN's unnamed
+  "Opening" feed in 2014-17; ESPN BET alone in 2025, whose opener missed by 14.73 vs 14.14 at the close, the
+  widest gap of any season). 2024, the one season whose opener is a median of about 10 books, is 50.4%.
+* **No information beyond the close** (slopes about 0, totals slightly negative): the model only knows things
+  the market adds by closing time. Any edge exists only before the line moves, so it depends on getting the
+  opener at a real limit.
+* **Not a directional bias in openers:** always-over and always-under lose (49-51%); betting the season scoring
+  average loses (51-52%). The ratings-only total (before stage 2) does about as well as S1 (54.7% / 55.1%), so the
+  signal is the ratings.
+* The model ran 1-2 points over the opener on average in 2024-26 (more overs than unders); not corrected, since
+  that would be tuning after seeing results.
+* Spreads: positive CLV (+0.5 to +0.8) but no win rate, consistent with the opener moving the model's way by less
+  than the model's error.
