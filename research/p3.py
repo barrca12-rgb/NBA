@@ -22,6 +22,21 @@ SUB_D = ["def_rebounding", "defense"]
 THREE = ["O_sel_thr", "O_make_thr", "D_sel_thr"]
 
 
+def _last150(x: np.ndarray, dates: np.ndarray) -> np.ndarray:
+    """Mean of x over the last 150 completed games on earlier dates (NaN x = not played yet; skipped); NaN until 150
+    games. Rows must be sorted by date."""
+    ok = ~np.isnan(x)
+    cn = np.concatenate([[0], np.cumsum(ok)])
+    cp = np.concatenate([[0], np.cumsum(np.where(ok, x, 0.0))])
+    k = np.searchsorted(dates, dates, side="left")          # games strictly before this date
+    nb = cn[k]
+    out = np.full(len(x), np.nan)
+    has = nb >= 150
+    j = np.searchsorted(cn, nb[has] - 150, side="left")
+    out[has] = (cp[k[has]] - cp[j]) / 150
+    return out
+
+
 def add_phase3(b: pd.DataFrame) -> pd.DataFrame:
     b = b.copy()
     reg = b["season_type"] == 2
@@ -33,13 +48,7 @@ def add_phase3(b: pd.DataFrame) -> pd.DataFrame:
     rec = np.full(len(b), np.nan)
     for s, idx in b.groupby("season").indices.items():
         d = b["date"].to_numpy()[idx]
-        p = pts[idx]
-        c = np.concatenate([[0], np.cumsum(p)])
-        first = np.searchsorted(d, d, side="left")          # games strictly before this date
-        k = first
-        lo = np.maximum(k - 150, 0)
-        ok = k >= 150
-        rec[idx[ok]] = (c[k[ok]] - c[lo[ok]]) / 150
+        rec[idx] = _last150(pts[idx], d)
     b["recent_dev"] = np.where(np.isnan(rec), 0.0, rec - b["season_avg_total"])
     for c in players.SUBSKILLS:
         for side in ("home", "away"):
@@ -146,10 +155,7 @@ def bias_correct(w: pd.DataFrame, k: float) -> pd.DataFrame:
     adj = np.zeros(len(w))
     for s, idx in w.groupby("season").indices.items():
         d = w["date"].to_numpy()[idx]
-        c = np.concatenate([[0], np.cumsum(res[idx])])
-        kk = np.searchsorted(d, d, side="left")
-        ok = kk >= 150
-        adj[idx[ok]] = (c[kk[ok]] - c[kk[ok] - 150]) / 150
+        adj[idx] = np.nan_to_num(_last150(res[idx], d))
     w["final_total"] = w["final_total"] + k * adj
     return w
 

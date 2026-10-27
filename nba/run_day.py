@@ -14,7 +14,7 @@ import os
 
 import pandas as pd
 
-from . import card, data, live, odds, record, record_page, report_html
+from . import card, data, injuries, live, odds, record, record_page, report_html
 
 REPORTS = os.path.join(os.path.dirname(__file__), "..", "reports")
 
@@ -36,9 +36,11 @@ def main():
         lines = odds.fetch(sch)
         op, cl = odds.track(lines)
         opens, usage = odds.fetch.opens, odds.fetch.usage
+        early = odds.fetch.early
     except Exception as e:                       # no key or feed down: last stored lines, no new plays logged
         print(f"SGO unavailable ({e}); using the last stored lines")
         opens, usage = {}, {"error": str(e)}
+        early = pd.DataFrame(columns=odds.COLS)
         op = pd.read_csv(os.path.join(odds.LINES, "openers.csv")) if os.path.exists(os.path.join(odds.LINES, "openers.csv")) else pd.DataFrame(columns=["sgo_event", "total", "home_spread", "seen"])
         cl = pd.read_csv(os.path.join(odds.LINES, "closing.csv")) if os.path.exists(os.path.join(odds.LINES, "closing.csv")) else pd.DataFrame(columns=["sgo_event", "home_spread", "total"])
         now = pd.Timestamp.now(tz="UTC")
@@ -47,16 +49,21 @@ def main():
     if a.date:
         days = [pd.Timestamp(a.date)]
     else:
+        # today, plus every later day (up to a week out) that already has lines: openers post days ahead
         days = [today]
-        tmr = today + pd.Timedelta(days=1)
-        if len(lines):
-            et = pd.to_datetime(lines["start"], utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
-            if (et == f"{tmr:%Y-%m-%d}").any():
-                days.append(tmr)
+        both = pd.concat([lines, early], ignore_index=True)
+        if len(both):
+            et = pd.to_datetime(both["start"], utc=True).dt.tz_convert("America/New_York").dt.normalize().dt.tz_localize(None)
+            days += sorted(d for d in set(et) if today < d <= today + pd.Timedelta(days=7))
     built = []
     for day in days:
-        proj, rt = live.project(day, season_of(day))
-        games, plays = card.build(proj, lines, opens, op, day, live=day >= today and not getattr(a, "stale", False))
+        proj, rt = live.project(day, season_of(day), today)
+        et = lambda d: pd.to_datetime(d["start"], utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
+        has_live = len(lines) and (et(lines) == f"{day:%Y-%m-%d}").any()
+        use_early = not has_live and len(early) and (et(early) == f"{day:%Y-%m-%d}").any()
+        games, plays = card.build(proj, early if use_early else lines, opens, op, day,
+                                  live=day >= today and not getattr(a, "stale", False), early=bool(use_early))
+        injuries.annotate(games, names, season_of(day))
         record.log(plays)
         built.append((day, games, rt))
         print(f"{day:%Y-%m-%d}: {len(games)} games, {sum(g['total_verdict'] == 'BET' for g in games)} plays, "

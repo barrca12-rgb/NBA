@@ -107,6 +107,11 @@ def strength(seasons, games: pd.DataFrame, slate: pd.DataFrame | None = None, re
         tg = pd.concat([tg, sl[~sl["game_id"].isin(tg["game_id"])]], ignore_index=True)
     tg = tg.sort_values(["date", "game_id"])
     tg["n"] = tg.groupby(["team_id", "season"]).cumcount()
+    # n_av: the slot whose "previous game" is the team's last completed one. Equal to n for played games; for
+    # unplayed ones (days ahead on the live card) every game after the last completed one maps to it.
+    done = tg["game_id"].isin(b["game_id"]).astype(int)
+    tg["n_av"] = done.groupby([tg["team_id"], tg["season"]]).cumsum() - done
+    tg["n_av"] = np.where(done == 1, tg["n"], tg["n_av"])
     b = b.merge(tg[["game_id", "team_id", "n"]], on=["game_id", "team_id"])
 
     def agg(sel: pd.DataFrame, w: pd.Series, tag: str) -> pd.DataFrame:
@@ -121,7 +126,8 @@ def strength(seasons, games: pd.DataFrame, slate: pd.DataFrame | None = None, re
     dressed = agg(b, b["exp_min"], "dressed")
     # previous game's players (minutes > 0), carried to the next game of the same team-season
     prev = b[b["minutes"] > 0][["team_id", "season", "n", "athlete_id"]].assign(n=lambda x: x["n"] + 1)
-    av = prev.merge(tg[["game_id", "team_id", "season", "n"]], on=["team_id", "season", "n"])
+    slot = tg[["game_id", "team_id", "season", "n_av"]].rename(columns={"n_av": "n"})
+    av = prev.merge(slot, on=["team_id", "season", "n"])
     # exp_min / ARC as of this game: his rows are known up to the previous game; exp_min at prev game + that game
     pm = b[b["minutes"] > 0][["team_id", "season", "n", "athlete_id", "minutes", "exp_min", "rated"] + COLS]
     pm = pm.assign(n=pm["n"] + 1)
@@ -142,7 +148,7 @@ def strength(seasons, games: pd.DataFrame, slate: pd.DataFrame | None = None, re
                                                **{c: (c, "last") for c in COLS})
             m = m.assign(team_id=t, season=s, n=n)
             rows.append(m.reset_index())
-    us = pd.concat(rows).merge(tg[["game_id", "team_id", "season", "n"]], on=["team_id", "season", "n"])
+    us = pd.concat(rows).merge(slot, on=["team_id", "season", "n"])
     usual = agg(us, us["w"], "usual")
     # played: who actually played, by actual minutes (known only after the game; used to fit past games only)
     played = agg(b[b["minutes"] > 0], b.loc[b["minutes"] > 0, "minutes"], "played")

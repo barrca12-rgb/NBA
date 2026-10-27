@@ -34,7 +34,9 @@ def best(lines: pd.DataFrame, col: str, price: str, higher: bool):
 
 
 def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.DataFrame, day: pd.Timestamp,
-          live: bool = True) -> tuple[list[dict], list[dict]]:
+          live: bool = True, early: bool = False) -> tuple[list[dict], list[dict]]:
+    """early: the day's lines are look-ahead numbers the books have taken down; edges are shown, nothing is logged."""
+    live = live and not early
     games, plays = [], []
     now = pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds")
     ln = lines.copy()
@@ -42,10 +44,13 @@ def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.Data
         ln["et"] = pd.to_datetime(ln["start"], utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
     for _, g in proj.iterrows():
         row = {k: (None if isinstance(v, float) and np.isnan(v) else v) for k, v in g.items()
-               if k in ("game_id", "start", "home", "away", "home_name", "away_name", "neutral", "model_margin",
+               if k in ("game_id", "start", "home", "away", "home_id", "away_id", "home_name", "away_name", "neutral", "model_margin",
                         "model_total", "model_home_pts", "model_away_pts", "model_home_spread", "p_home_win",
-                        "home_rest", "away_rest", "home_avail_net", "away_avail_net", "home_usual_net", "away_usual_net")}
+                        "home_rest", "away_rest", "home_avail_net", "away_avail_net", "home_usual_net", "away_usual_net",
+                        "early_w")}
         row["start"] = str(g["start"])
+        row["early"] = early
+        row["home_id"], row["away_id"] = int(g["home_id"]), int(g["away_id"])
         L = ln[(ln.get("et") == f"{day:%Y-%m-%d}") & (ln["home_id"] == g["home_id"]) & (ln["away_id"] == g["away_id"])] if len(ln) else ln
         row["n_books"] = int(L["book"].nunique()) if len(L) else 0
         row["book_lines"] = [{k: (None if pd.isna(v) else v) for k, v in r.items() if k not in ("et",)}

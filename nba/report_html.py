@@ -237,6 +237,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><nav class="days" id="days" aria-label="Days"></nav><a class="pagebtn" href="record.html">Record</a></div>
   </div>
 
+  <div class="notice" id="early" hidden>Early lines: books posted these numbers and have taken them down until closer to the game. Edges are shown so you can see what's coming; nothing is logged as a play until a book reopens the line.</div>
   <div class="notice" id="stale" hidden>Live lines unavailable on the last update (SportsGameOdds). Lines shown are the last ones stored; no new plays were logged.</div>
 
   <div class="kpis" id="kpis"></div>
@@ -254,6 +255,11 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
       </div>
     </div>
     <div class="scroll"><table class="board" id="t-board"></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="news-h" id="news-sec" hidden>
+    <div class="panel-h"><h2 id="news-h">Injury news</h2><span class="note">ESPN injury report, refreshed every update. Listed players who played in their team's last game: the projection still counts them. "If out" = what the model's own weights say his absence does.</span></div>
+    <div class="scroll"><table id="t-news"></table></div>
   </section>
 
   <section class="panel" aria-labelledby="watch-h" id="watch-sec">
@@ -309,6 +315,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   };
   navDays([D.date]);
   $("stale").hidden = !(D.usage && D.usage.error);
+  $("early").hidden = !D.games.some((g) => g.early);
   fetch("days.json", {cache: "no-store"}).then((r) => r.json()).then((j) => navDays(j.days)).catch(() => {});
 
   // Plays (totals) and leans (spreads)
@@ -325,10 +332,11 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const missing = (g) => ["away", "home"].map((sd) => { const u = g[sd + "_usual_net"], a = g[sd + "_avail_net"];
     return u != null && a != null && u - a > 1 ? g[sd] + " short-handed in last game (" + sgn(a - u) + " ARC)" : ""; }).filter(Boolean).join(" · ");
   $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm hide-md'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm hide-md'>Opened</th><th class='r hide-sm hide-md'>Units</th></tr></thead><tbody>" +
-    P.map((p) => "<tr><td><div class='b pick'>" + esc(p.bet) + "</div><div class='f' style='font-size:12px'>" + matchupL(p.g) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
+    P.map((p) => "<tr><td><div class='b pick'>" + esc(p.bet) + (p.g.early ? " <span class='tag'>Early line</span>" : "") + "</div><div class='f' style='font-size:12px'>" + matchupL(p.g) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
       (also(p.g) ? "<div class='f' style='font-size:12px'>" + esc(also(p.g)) + "</div>" : "") +
       (missing(p.g) ? "<div class='inj'>" + esc(missing(p.g)) + "</div>" : "") +
-      (p.g.total_warn ? "<div class='inj'>&#9888; " + esc(p.g.total_warn) + "</div>" : "") + "</td><td>" +
+      (p.g.total_warn ? "<div class='inj'>&#9888; " + esc(p.g.total_warn) + "</div>" : "") +
+      (p.g.news ? "<div class='inj'>&#9888; " + esc(p.g.news) + "</div>" : "") + "</td><td>" +
       esc(p.book || "–") + (p.price != null ? " <span class='m'>" + esc(odds(p.price)) + "</span>" : "") + "</td><td class='r m hide-sm hide-md'>" + esc(p.model) + "</td><td class='r pos b'>" + sgn(p.edge) +
       "</td><td class='r m hide-sm'>" + pct(p.p) + "</td><td class='r'>" + (p.ev == null ? "–" : sgn(100 * p.ev) + "%") +
       "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm hide-md'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm hide-md'>" + num(p.units, 2) + "</td></tr>").join("") + "</tbody>"
@@ -346,7 +354,8 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const st = D.record ? D.record.status : null;
   const rec = (s) => s && s.bets ? s.w + "–" + s.l + (s.p ? "–" + s.p : "") : "0–0";
   const T = st && st.totals, S = st && st["spread leans"];
-  const kp = [["Plays today", P.length + "<small>" + P.length + "u</small>"],
+  const NP = P.filter((p) => !p.g.early).length;
+  const kp = [["Plays today", NP + "<small>" + NP + "u" + (P.length > NP ? " · " + (P.length - NP) + " early" : "") + "</small>"],
     ["Totals", rec(T) + "<small>" + (T && T.win != null ? pct(T.win) : "") + "</small>"],
     ["Spread leans", rec(S) + "<small>" + (S && S.win != null ? pct(S.win) : "") + "</small>"],
     ["Units", "<span class='" + (T && T.units > 0 ? "pos" : T && T.units < 0 ? "neg" : "") + "'>" + sgn(T ? T.units : 0, 2) + "</span>"],
@@ -398,7 +407,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
           const pick = (g.total_pick || "").toLowerCase() === ou && ["BET", "WATCH"].includes(g.total_verdict);
           bookCells = BOOKS.map((bk) => { const x = bl(g, bk); if (!x || x.total == null) return cell(null);
             return cell((i === 0 ? "o" : "u") + num(x.total), x[ou + "_odds"], x[ou + "_link"], pick && g.total_book === bk && x.total === g.total_line); });
-          if (pick && g.total_verdict === "BET") edge = "<span class='tag bet'>BET " + sgn(g.total_edge) + "</span>";
+          if (pick && g.total_verdict === "BET") edge = g.early ? "<span class='tag'>Early " + sgn(g.total_edge) + "</span>" : "<span class='tag bet'>BET " + sgn(g.total_edge) + "</span>";
           else if (pick) edge = "<span class='tag'>Watch · bet at " + ou[0] + num(playAt(g.total_good_to, ou === "under")) + "</span>";
         } else {
           const p = sd === "home" ? g.p_home_win : 1 - g.p_home_win;
@@ -409,7 +418,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
         }
         return "<tr>" + (i === 0 ? "<td class='tm' rowspan='2'>" + esc(tip(g)) + "</td>" : "") +
           "<td class='team'>" + (i === 0 ? "<div class='tm-sm'>" + esc(tip(g)) + "</div>" : "") + (i === 1 && !g.neutral ? "<span class='f'>@ </span>" : "") +
-          logo(g[sd], 18) + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td>" +
+          logo(g[sd], 18) + esc(g[sd]) + (g[sd + "_injuries"] ? "<div class='inj'>" + esc(g[sd + "_injuries"]) + "</div>" : "") + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td>" +
           bookCells.map((c, j) => "<td class='bk" + (j >= 4 ? " bk-minor" : "") + "'>" + c + "</td>").join("") + "<td class='bestc'>" + best(g, sd, i) + "</td><td class='r edge'>" + edge + "</td></tr>";
       }).join("");
       return "<tbody class='g" + (hasBet ? " has-bet" : "") + "'>" + rows + "</tbody>";
@@ -420,6 +429,17 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     market = b.dataset.m; document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", x === b)); board(); });
   $("only-plays").onchange = board;
   board();
+
+  // Injury news: listed players the model still counts
+  const NW = [];
+  D.games.forEach((g) => (g.injury_alerts || []).forEach((a) => NW.push({g, a})));
+  if (NW.length) {
+    $("news-sec").hidden = false;
+    $("t-news").innerHTML = "<thead><tr><th>Player</th><th>Status</th><th>Game</th><th class='r hide-sm'>Min</th><th class='r hide-sm'>ARC</th><th class='r'>If out: total</th><th class='r'>If out: margin</th></tr></thead><tbody>" +
+      NW.map(({g, a}) => "<tr><td><div class='b'>" + logo(a.team, 16) + esc(a.player) + "</div><div class='f' style='font-size:12px;white-space:normal;max-width:420px'>" + esc(a.comment) + "</div></td><td>" + esc(a.status) +
+        "</td><td>" + matchupL(g) + " · " + esc(tip(g)) + (g.total_verdict === "BET" ? " <span class='tag bet'>Play</span>" : "") + "</td><td class='r m hide-sm'>" + num(a.minutes, 0) + "</td><td class='r m hide-sm'>" + sgn(a.arc) +
+        "</td><td class='r b'>" + sgn(a.d_total) + "</td><td class='r'>" + esc(g.home) + " " + sgn(a.d_home_margin) + "</td></tr>").join("") + "</tbody>";
+  }
 
   // Watch list
   const W = D.games.filter((g) => g.total_verdict === "WATCH");

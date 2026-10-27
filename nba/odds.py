@@ -86,7 +86,7 @@ def fetch(schedule: pd.DataFrame) -> pd.DataFrame:
             break
     lk = lookup(schedule)
     now = pd.Timestamp.now(tz="UTC")
-    rows, opens = [], {}
+    rows, opens, early = [], {}, []
     for ev in events:
         st = ev.get("status") or {}
         if st.get("started") or st.get("ended") or st.get("cancelled"):
@@ -105,9 +105,20 @@ def fetch(schedule: pd.DataFrame) -> pd.DataFrame:
         opens[ev.get("eventID")] = {"open_total": _num(ou.get("openBookOverUnder")),
                                     "open_home_spread": _num(sp.get("openBookSpread"))}
         per_book: dict = {}
+        off_board: dict = {}   # posted, then taken down (look-ahead lines days out): shown as early lines only
         for odd_id, (line_col, price_col, link_col) in ODDS.items():
             for bk, o in ((odds.get(odd_id) or {}).get("byBookmaker") or {}).items():
-                if bk not in BOOKS or o.get("available") is False:
+                if o.get("available") is False:
+                    if bk in BOOKS or bk in ("1xbet", "fliff"):
+                        r = off_board.setdefault(bk, {"book": BOOKS.get(bk, bk), "sgo_event": ev.get("eventID"),
+                                                      "start": st.get("startsAt"), "home_id": h, "away_id": a})
+                        r[price_col] = _num(o.get("odds"))
+                        if line_col == "home_spread":
+                            r["home_spread"] = _num(o.get("spread"))
+                        elif line_col == "total":
+                            r["total"] = _num(o.get("overUnder"))
+                    continue
+                if bk not in BOOKS:
                     continue
                 upd = pd.to_datetime(o.get("lastUpdatedAt"), utc=True, errors="coerce")
                 if pd.notna(upd) and now - upd > MAX_AGE:
@@ -122,7 +133,9 @@ def fetch(schedule: pd.DataFrame) -> pd.DataFrame:
                 elif line_col == "total":
                     r["total"] = _num(o.get("overUnder"))
         rows += per_book.values()
+        early += [r for bk, r in off_board.items() if bk not in per_book]
     fetch.opens, fetch.events = opens, len(events)
+    fetch.early = pd.DataFrame(early).reindex(columns=COLS)
     return pd.DataFrame(rows).reindex(columns=COLS)
 
 

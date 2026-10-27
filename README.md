@@ -27,3 +27,13 @@ Update button). Same design as the CBB card.
   the final (`nba/record.py`).
 
     python -m nba.run_day --auto        # today, plus tomorrow when tomorrow has lines
+
+**Days ahead and early lines.** Each run builds today plus every later day (up to a week) that has lines. Lines a
+book posted and then pulled (look-ahead numbers, often days out) are shown as "Early" with edges, but no play is
+logged until a book reopens the line. Projections for later days count the games in between for rest and
+back-to-backs and use each team's last completed game for availability.
+
+**Injury feed** (`nba/injuries.py`): ESPN's injury report on every run, saved to `injuries/latest.csv` and
+`injuries/log.csv` (first-seen times). Listed players who played in their team's last game (the projection still
+counts them) are flagged on the plays and in the Injury news panel, with what the model's own weights say their
+absence would do to the total and margin. Nothing here changes a projection or a logged play.
