@@ -175,3 +175,47 @@ Not pre-registered; cannot change the verdict. They say how much weight it deser
   that would be tuning after seeing results.
 * Spreads: positive CLV (+0.5 to +0.8) but no win rate, consistent with the opener moving the model's way by less
   than the model's error.
+
+---
+
+## Entry 6 (2026-10-27): phase 2 plan, written before any phase-2 run
+
+Chad's direction: test only on the last three seasons (2023-24, 2024-25, 2025-26; all have openers) and improve
+the stats the model uses, for spreads and totals. Reference: lumahoops.org.
+
+**Guard against fooling ourselves.** Tuning features on all three test seasons would leave no out-of-sample
+check, so:
+* **Selection seasons: 2024 and 2025** (2023-24, 2024-25). Every candidate is scored there.
+* **Check season: 2026** (2025-26), scored once, on the final specification only.
+* Stage 2 is still trained walk-forward on earlier seasons only (2013 on); old seasons are training data, not
+  tests.
+* **Adoption rule:** a candidate feature is kept if it lowers the selection-season miss (margin MAE for spread
+  features, total MAE for total features) vs the current spec. Win % at the opener is reported for every
+  candidate but not used to choose: at about 600 plays a season it is too noisy to select on without
+  overfitting.
+* Scorecards and the 52.4% / interval / CLV rule are unchanged. Spreads 3+ and totals 4+ remain the headline
+  thresholds.
+
+**New data (free, no keys):** LUMA ARC v3.1 season boards (lumahoops.org open data, CC BY 4.0, release SHA-256
+dffdf0b2...0f33): player impact per 100 possessions, 1997-98 to 2025-26. hoopR player box scores 2013-2026.
+Players are matched by name (ESPN to NBA ids). A player's ARC for season s is the season s-1 board (2-year
+window), so nothing from season s is used. Caveat: ARC's box-score weights are fit by LUMA across all seasons,
+which may leak slightly.
+
+**Pregame timing.** Player box scores list only players dressed for a game (announced near tip), after the
+opener. Bettable features use only players who played in the team's previous game; for a team's first game of a
+season (no previous game), the dressed list stands in (about 30 games a season).
+
+**Candidates, in this order, each added only if it passes the adoption rule:**
+* P1 player strength: minutes-weighted ARC of the players who played in the team's previous game (expected
+  minutes = their average over their last 10 appearances), plus the same for the team's usual rotation (last 10
+  team games). Margin: available-strength difference and missing-strength difference. Total: offensive and
+  defensive ARC sums.
+* P2 3-point luck regressed in the ratings (CBB THREE_LUCK = 0.35).
+* P3 schedule fatigue: 3 games in 4 nights, games in the last 7 days; travel (time zones crossed since the last
+  game); altitude (Denver, Utah home games).
+* P4 stage 2 weights recent seasons more (season half-life 3).
+* P5 a shorter half-life for pace than for efficiency (pace 15 days).
+
+**Diagnostic only (not bettable at the open):** the same player strength from the dressed list, to show how much
+late injury news is worth.
