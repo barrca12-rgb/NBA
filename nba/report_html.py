@@ -177,6 +177,8 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     <nav class="days" id="days" aria-label="Days"></nav>
   </div>
 
+  <div class="notice" id="stale" hidden>Live lines unavailable on the last update (SportsGameOdds). Lines shown are the last ones stored; no new plays were logged.</div>
+
   <div class="kpis" id="kpis"></div>
 
   <section class="panel" aria-labelledby="plays-h">
@@ -249,6 +251,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
       new Date(d + "T12:00:00").toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}) + "</a>").join("");
   };
   navDays([D.date]);
+  $("stale").hidden = !(D.usage && D.usage.error);
   fetch("days.json", {cache: "no-store"}).then((r) => r.json()).then((j) => navDays(j.days)).catch(() => {});
 
   // Plays (totals) and leans (spreads)

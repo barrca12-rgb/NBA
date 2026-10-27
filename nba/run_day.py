@@ -36,12 +36,14 @@ def main():
         lines = odds.fetch(sch)
         op, cl = odds.track(lines)
         opens, usage = odds.fetch.opens, odds.fetch.usage
-    except Exception as e:                       # no key or feed down: still build projections
-        print(f"SGO unavailable: {e}")
-        lines = pd.DataFrame(columns=odds.COLS)
-        opens, usage = {}, {}
+    except Exception as e:                       # no key or feed down: last stored lines, no new plays logged
+        print(f"SGO unavailable ({e}); using the last stored lines")
+        opens, usage = {}, {"error": str(e)}
         op = pd.read_csv(os.path.join(odds.LINES, "openers.csv")) if os.path.exists(os.path.join(odds.LINES, "openers.csv")) else pd.DataFrame(columns=["sgo_event", "total", "home_spread", "seen"])
         cl = pd.read_csv(os.path.join(odds.LINES, "closing.csv")) if os.path.exists(os.path.join(odds.LINES, "closing.csv")) else pd.DataFrame(columns=["sgo_event", "home_spread", "total"])
+        now = pd.Timestamp.now(tz="UTC")
+        lines = cl[pd.to_datetime(cl["start"], utc=True) > now].reindex(columns=odds.COLS) if len(cl) else pd.DataFrame(columns=odds.COLS)
+        a.stale = True
     if a.date:
         days = [pd.Timestamp(a.date)]
     else:
@@ -54,7 +56,7 @@ def main():
     built = []
     for day in days:
         proj, rt = live.project(day, season_of(day))
-        games, plays = card.build(proj, lines, opens, op, day, live=day >= today)
+        games, plays = card.build(proj, lines, opens, op, day, live=day >= today and not getattr(a, "stale", False))
         record.log(plays)
         built.append((day, games, rt))
         print(f"{day:%Y-%m-%d}: {len(games)} games, {sum(g['total_verdict'] == 'BET' for g in games)} plays, "
