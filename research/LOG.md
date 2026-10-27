@@ -279,3 +279,45 @@ scored once in entry 8, so it is no longer completely fresh; it has still never 
 * P9 the same six subskills as home-minus-away differences for the margin.
 * P10 three-point profile for totals: sums of offensive 3-point shot selection and making (O_sel_thr,
   O_make_thr) and defensive 3-point selection allowed (D_sel_thr).
+
+## Entry 10 (2026-10-27): phase 3 selection result, and one added candidate (written before running it)
+
+Selection on 2024-25 (`research/out/p3_select.md`; base reproduces the phase 2 spec exactly):
+
+| spec | margin MAE | total MAE | spreads 3+ | totals 4+ | adopted | over share | model - opener, Mar-Jun |
+|---|---:|---:|---:|---:|---|---:|---:|
+| phase 2 spec | 10.950 | 14.545 | 54.7% (666) | 56.8% (949) | base | 73% | +4.02 |
+| P6 late season and playoffs | 10.943 | 14.459 | 54.8% (673) | 58.2% (921) | margin, total | 77% | +3.28 |
+| P7 recent scoring environment | 10.943 | 14.417 | 54.8% (673) | 57.4% (853) | total | 75% | +2.65 |
+| P8 subskills, totals | 10.943 | 14.417 | 54.8% (673) | 57.1% (860) | no | 74% | +2.56 |
+| P9 subskills, margin | 10.944 | 14.417 | 55.0% (665) | 57.4% (853) | no | 75% | +2.65 |
+| P10 three-point profile, totals | 10.943 | 14.420 | 54.8% (673) | 57.2% (867) | no | 74% | +2.64 |
+
+LUMA subskills add nothing beyond overall ARC offense/defense. The late-season fix cut the March-June gap to the
+opener from +4.0 to +2.7 points, but the model still runs 1-2 points above results from January to April
+(model minus result +0.95, +1.93, +2.01, +1.72), so totals plays stay ~75% overs (overs win 55.8%, unders 62.3%).
+
+* P11 in-season bias correction (totals): final total + k x (mean of result minus model total over the league's
+  last 150 games on earlier dates, same season; 0 before 150 games). k from {0.25, 0.5, 1.0}, chosen by 2024-25
+  total MAE, adopted only if it beats P7.
+
+## Entry 11 (2026-10-27): P11 result and the phase 3 final spec (`research/out/p3_final.md`)
+
+P11 on 2024-25: total MAE 14.417 -> 14.381 (k 0.25), **14.362 (k 0.5, adopted)**, 14.368 (k 1.0). Over share
+75% -> 69%; March-June model minus opener +2.65 -> +1.60.
+
+Final phase 3 spec = phase 2 + P6 + P7 + P11 (k 0.5); `research/out/p3_spec.json`. 2026 scored once for this
+spec (its second look overall; never used to choose).
+
+| at the opener | 2024 | 2025 | **2026 (check)** | all three | phase 2 spec, all three |
+|---|---:|---:|---:|---:|---:|
+| Spreads 3+ | 54.0% (287) | 55.4% (386) | **53.8% (381)** | 54.5% (1,054), 51.4-57.7% | 54.1% (1,056) |
+| Totals 4+ | 56.7% (372) | 60.7% (422) | **58.9% (336)**, 53.2-64.4% | 58.8% (1,130), 55.8-61.9% | 56.2% (1,332) |
+| Totals over share | 71% | 67% | 64% | | 73-79% |
+| Totals CLV (pts) | +2.40 | +4.30 | +2.29 | +3.08 | +2.58 |
+
+* Totals improved on the check season (54.8% -> 58.9%); the lean to overs is reduced, not gone (64-71%).
+* Spreads essentially unchanged (53.1% -> 53.8% in 2026); none of the phase 3 inputs were aimed at spreads.
+* Still no information beyond the close (slopes 0.06 total, -0.02 margin, both well inside 1 se of 0).
+* Caution (CBB lesson): results near 60% in a backtest deserve suspicion. Openers in 2025-26 come from single
+  books, and nothing here verifies opener timing, limits or fills.

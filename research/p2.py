@@ -48,7 +48,7 @@ _PS = []
 
 def player_strength(g: pd.DataFrame) -> pd.DataFrame:
     if not _PS:
-        path = os.path.join(data.CACHE, "strength_2014_2026.pkl")
+        path = os.path.join(data.CACHE, "strength_2014_2026_v2.pkl")
         if os.path.exists(path):
             _PS.append(pd.read_pickle(path))
         else:
