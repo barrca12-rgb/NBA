@@ -10,6 +10,7 @@ bench) get ROOKIE_ARC.
 """
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import unicodedata
@@ -38,9 +39,19 @@ def norm(name: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+ARC_SHA256 = "822e6c7d9d5fbb60c1e035ba1bbb6352295ff8db80bd08f24585ec2c79353ad6"   # LUMA MANIFEST.txt, v3.1
+
+
 def arc() -> pd.DataFrame:
     if not os.path.exists(ARC_FILE):
-        urllib.request.urlretrieve(ARC_URL, ARC_FILE)
+        os.makedirs(data.CACHE, exist_ok=True)
+        req = urllib.request.Request(ARC_URL, headers={"User-Agent": "Mozilla/5.0 (nba-card; LUMA open data)"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            body = r.read()
+        if hashlib.sha256(body).hexdigest() != ARC_SHA256:
+            raise RuntimeError("LUMA ARC file does not match the release hash")
+        with open(ARC_FILE, "wb") as f:
+            f.write(body)
     a = pd.read_csv(ARC_FILE)
     a = a[a["window_years"] == 2].copy()
     a["season"] = a["season"].str[:4].astype(int) + 1        # "2024-25" -> 2025
@@ -49,11 +60,11 @@ def arc() -> pd.DataFrame:
     return a.sort_values("poss").drop_duplicates(["season", "key"], keep="last")[["season", "key"] + COLS]
 
 
-def box(seasons) -> pd.DataFrame:
+def box(seasons, refresh=()) -> pd.DataFrame:
     parts = []
     for s in seasons:
         path = os.path.join(data.CACHE, f"player_box_{s}.parquet")
-        if not os.path.exists(path):
+        if not os.path.exists(path) or s in refresh:
             urllib.request.urlretrieve(BOX_URL.format(season=s), path)
         b = pd.read_parquet(path, columns=["game_id", "season", "game_date", "athlete_id", "athlete_display_name",
                                            "team_id", "minutes", "did_not_play"])
@@ -66,9 +77,10 @@ def box(seasons) -> pd.DataFrame:
     return b.drop_duplicates(["game_id", "athlete_id"])
 
 
-def strength(seasons, games: pd.DataFrame) -> pd.DataFrame:
-    """One row per (game_id, team_id): avail_/usual_/dressed_ net, O, D, plus the share of players matched."""
-    b = box(sorted(set(seasons) | {min(seasons) - 1}))
+def strength(seasons, games: pd.DataFrame, slate: pd.DataFrame | None = None, refresh=()) -> pd.DataFrame:
+    """One row per (game_id, team_id): avail_/usual_/dressed_ net, O, D, plus the share of players matched.
+    slate: unplayed games (game_id, season, date, home_id, away_id) to get avail_/usual_ for (live card)."""
+    b = box(sorted(set(seasons) | {min(seasons) - 1}), refresh)
     b = b[b["game_id"].isin(games["game_id"]) | (b["season"] == min(seasons) - 1)]
     a = arc()
     b["arc_season"] = b["season"] - 1
@@ -87,7 +99,13 @@ def strength(seasons, games: pd.DataFrame) -> pd.DataFrame:
     b["exp_min"] = played.groupby(b["athlete_id"]).transform(
         lambda x: x.shift().rolling(10, min_periods=1).mean()).fillna(0)
     # team game sequence within season
-    tg = b[["game_id", "team_id", "season", "date"]].drop_duplicates(["game_id", "team_id"]).sort_values("date")
+    tg = b[["game_id", "team_id", "season", "date"]].drop_duplicates(["game_id", "team_id"])
+    if slate is not None and len(slate):
+        sl = pd.concat([slate[["game_id", "season", "date", "home_id"]].rename(columns={"home_id": "team_id"}),
+                        slate[["game_id", "season", "date", "away_id"]].rename(columns={"away_id": "team_id"})])
+        sl["date"] = pd.to_datetime(sl["date"])
+        tg = pd.concat([tg, sl[~sl["game_id"].isin(tg["game_id"])]], ignore_index=True)
+    tg = tg.sort_values(["date", "game_id"])
     tg["n"] = tg.groupby(["team_id", "season"]).cumcount()
     b = b.merge(tg[["game_id", "team_id", "n"]], on=["game_id", "team_id"])
 
@@ -128,7 +146,8 @@ def strength(seasons, games: pd.DataFrame) -> pd.DataFrame:
     usual = agg(us, us["w"], "usual")
     # played: who actually played, by actual minutes (known only after the game; used to fit past games only)
     played = agg(b[b["minutes"] > 0], b.loc[b["minutes"] > 0, "minutes"], "played")
-    out = dressed.join(avail, how="left").join(usual, how="left").join(played, how="left")
+    out = (tg.set_index(["game_id", "team_id"])[[]].join(dressed, how="left").join(avail, how="left")
+           .join(usual, how="left").join(played, how="left"))
     # first game of a season (no previous game): the dressed list stands in
     for tag in ("avail", "usual"):
         for c in COLS + ["rated"]:

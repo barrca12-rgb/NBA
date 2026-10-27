@@ -58,8 +58,8 @@ def player_strength(g: pd.DataFrame) -> pd.DataFrame:
     return _PS[0]
 
 
-def add_players(b: pd.DataFrame) -> pd.DataFrame:
-    st = player_strength(b)
+def add_players(b: pd.DataFrame, st: pd.DataFrame | None = None) -> pd.DataFrame:
+    st = player_strength(b) if st is None else st
     for side in ("home", "away"):
         m = st.rename(columns={"team_id": f"{side}_id", **{c: f"{side}_{c}" for c in st.columns
                                                             if c not in ("game_id", "team_id")}})

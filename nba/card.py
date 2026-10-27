@@ -1,0 +1,109 @@
+"""One day's NBA card: projections (live.py) joined to SportsGameOdds lines (odds.py), best number per side across
+books, plays and leans, and the plays log (record.py).
+
+Rules (from the backtest, research/LOG.md): totals edge 4+ points vs the best available number = BET (1 unit,
+price -130 or better); 3-4 = WATCH. Spreads edge 3+ = LEAN, tracked but not bet.
+"""
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+from . import record
+
+TOTAL_EDGE, TOTAL_WATCH, SPREAD_EDGE, MIN_PRICE = 4.0, 3.0, 3.0, -130
+# backtest win rate at the opener by edge (phase 4 spec, 2024-2026; 6+ shrunk toward the 4+ rate)
+def total_p(e): return 0.557 if e < 6 else 0.60
+SPREAD_P = 0.545
+
+
+def _payout(o):
+    return np.nan if o is None or pd.isna(o) else (o / 100 if o > 0 else 100 / -o)
+
+
+def best(lines: pd.DataFrame, col: str, price: str, higher: bool):
+    """Best number for one side across books (most favorable line, then best price)."""
+    d = lines.dropna(subset=[col])
+    if not len(d):
+        return None
+    d = d.assign(_k=d[col] * (1 if higher else -1), _p=d[price].map(_payout).fillna(-1))
+    r = d.sort_values(["_k", "_p"], ascending=False).iloc[0]
+    link = r.get(price.replace("_odds", "_link"))
+    return {"book": r["book"], "line": float(r[col]), "odds": None if pd.isna(r[price]) else float(r[price]),
+            "link": link if isinstance(link, str) else None}
+
+
+def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.DataFrame, day: pd.Timestamp,
+          live: bool = True) -> tuple[list[dict], list[dict]]:
+    games, plays = [], []
+    now = pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds")
+    ln = lines.copy()
+    if len(ln):
+        ln["et"] = pd.to_datetime(ln["start"], utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
+    for _, g in proj.iterrows():
+        row = {k: (None if isinstance(v, float) and np.isnan(v) else v) for k, v in g.items()
+               if k in ("game_id", "start", "home", "away", "home_name", "away_name", "neutral", "model_margin",
+                        "model_total", "model_home_pts", "model_away_pts", "model_home_spread", "p_home_win",
+                        "home_rest", "away_rest", "home_avail_net", "away_avail_net", "home_usual_net", "away_usual_net")}
+        row["start"] = str(g["start"])
+        L = ln[(ln.get("et") == f"{day:%Y-%m-%d}") & (ln["home_id"] == g["home_id"]) & (ln["away_id"] == g["away_id"])] if len(ln) else ln
+        row["n_books"] = int(L["book"].nunique()) if len(L) else 0
+        row["book_lines"] = [{k: (None if pd.isna(v) else v) for k, v in r.items() if k not in ("et",)}
+                             for r in L.drop(columns=["sgo_event", "start", "home_id", "away_id"], errors="ignore").to_dict("records")]
+        ev = L["sgo_event"].iloc[0] if len(L) else None
+        row["sgo_event"] = ev
+        o = opens.get(ev, {}) if ev else {}
+        fo = openers[openers["sgo_event"] == ev] if ev is not None and len(openers) else openers.iloc[0:0]
+        row["open_total"] = o.get("open_total") if o.get("open_total") == o.get("open_total") else (fo["total"].median() if len(fo) else None)
+        row["open_home_spread"] = o.get("open_home_spread") if o.get("open_home_spread") == o.get("open_home_spread") else (fo["home_spread"].median() if len(fo) else None)
+        row["first_seen"] = fo["seen"].min() if len(fo) else None
+        mt, mm = g["model_total"], g["model_margin"]
+        # totals
+        bo, bu = best(L, "total", "over_odds", higher=False), best(L, "total", "under_odds", higher=True)
+        cand = []
+        if bo: cand.append(("over", mt - bo["line"], bo))
+        if bu: cand.append(("under", bu["line"] - mt, bu))
+        row["total_verdict"] = None
+        if cand and pd.notna(mt):
+            side, e, b = max(cand, key=lambda x: x[1])
+            ok_price = b["odds"] is None or b["odds"] >= MIN_PRICE
+            p = total_p(e)
+            row.update({"total_pick": side.title(), "total_line": b["line"], "total_odds": b["odds"], "total_book": b["book"],
+                        "total_link": b["link"], "total_edge": round(e, 2), "total_p": p,
+                        "total_ev": p * _payout(b["odds"] if b["odds"] is not None else -110) - (1 - p),
+                        "total_good_to": mt - TOTAL_EDGE if side == "over" else mt + TOTAL_EDGE,
+                        "total_units": 1.0})
+            row["total_verdict"] = "BET" if e >= TOTAL_EDGE and ok_price else "WATCH" if e >= TOTAL_WATCH else None
+            if e >= 8:
+                row["total_warn"] = ("Edge of 8+ points: rare in the backtest. Check injury news and the lineup; the "
+                                     "model only knows who played in each team's last game.")
+            if row["total_verdict"] == "BET" and live:
+                plays.append(_play(day, g, ev, "total", "play", side, f"{side.title()} {b['line']:g}", b, mt, e, p, now))
+        # spreads (leans only)
+        bh, ba = best(L, "home_spread", "home_spread_odds", higher=True), None
+        if len(L) and L["home_spread"].notna().any():
+            A = L.assign(away_spread=-L["home_spread"])
+            ba = best(A, "away_spread", "away_spread_odds", higher=True)
+        cand = []
+        if bh: cand.append(("home", mm + bh["line"], bh))
+        if ba: cand.append(("away", -mm + ba["line"], ba))
+        row["spread_verdict"] = None
+        if cand and pd.notna(mm):
+            side, e, b = max(cand, key=lambda x: x[1])
+            team = g["home"] if side == "home" else g["away"]
+            row.update({"spread_side": side, "spread_pick": team, "spread_line": b["line"], "spread_odds": b["odds"],
+                        "spread_book": b["book"], "spread_link": b["link"], "spread_edge": round(e, 2), "spread_p": SPREAD_P})
+            if e >= SPREAD_EDGE:
+                row["spread_verdict"] = "LEAN"
+                if live:
+                    plays.append(_play(day, g, ev, "spread", "lean", side, f"{team} {b['line']:+g}", b, mm if side == "home" else -mm,
+                                       e, SPREAD_P, now))
+        games.append(row)
+    return games, plays
+
+
+def _play(day, g, ev, market, kind, side, pick, b, model, edge, p, now) -> dict:
+    return {"bet_id": f"{day:%Y-%m-%d}|{g['game_id']}|{market}|{side}", "date": f"{day:%Y-%m-%d}", "game_id": int(g["game_id"]),
+            "sgo_event": ev, "start": str(g["start"]), "home": g["home"], "away": g["away"], "market": market, "kind": kind,
+            "side": side, "pick": pick, "line": b["line"], "odds": b["odds"], "book": b["book"], "model": round(float(model), 2),
+            "edge": round(float(edge), 2), "win_p": p, "logged_at": now}

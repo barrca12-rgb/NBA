@@ -1,0 +1,4 @@
+bet_id,date,game_id,sgo_event,start,home,away,market,kind,side,pick,line,odds,book,model,edge,win_p,logged_at,close_line,clv_pts,home_score,away_score,result,profit
+2026-10-27|401909880|total|under,2026-10-27,401909880,jHX9XeeKJsLkc910NrDz,2026-10-28 03:00:00+00:00,LAL,POR,total,play,under,Under 234.5,234.5,-115.0,FanDuel,228.62,5.88,0.557,2026-10-27T18:04:40+00:00,,,,,,
+2026-10-27|401909878|spread|away,2026-10-27,401909878,nluHRog9os3byvlgmEWZ,2026-10-28 00:00:00+00:00,NY,DET,spread,lean,away,DET +4.5,4.5,-110.0,FanDuel,0.94,5.44,0.545,2026-10-27T18:04:40+00:00,,,,,,
+2026-10-28|401909884|total|under,2026-10-28,401909884,VGJWBj7vPgHtBMUiei6o,2026-10-28 23:00:00+00:00,IND,PHI,total,play,under,Under 239.5,239.5,-108.0,DraftKings,229.04,10.46,0.6,2026-10-27T18:05:49+00:00,,,,,,

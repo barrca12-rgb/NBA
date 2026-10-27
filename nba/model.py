@@ -27,10 +27,12 @@ def _games(seasons):
     return g, t.drop(columns="nn")
 
 
-def stage1(cfg: ratings.RatingConfig, first: int, last: int, hook=None) -> pd.DataFrame:
+def stage1(cfg: ratings.RatingConfig, first: int, last: int, hook=None, extra: pd.DataFrame | None = None) -> pd.DataFrame:
     """Ratings-only predictions for seasons first..last. Season first-1 is loaded only for the prior. hook(g, t)
     may return a modified team_games frame (e.g. an adjusted target column or per-game weights)."""
     g, t = _games(range(first - 1, last + 1))
+    if extra is not None and len(extra):          # unplayed games to predict (live card): no scores, no box
+        g = pd.concat([g, extra[~extra["game_id"].isin(g["game_id"])]], ignore_index=True)
     if hook is not None:
         t = hook(g, t)
     teams = sorted(data.TEAMS)
@@ -47,7 +49,8 @@ def stage1(cfg: ratings.RatingConfig, first: int, last: int, hook=None) -> pd.Da
             r = ratings.fit(ts, d, teams, prior, cfg, league)
             p = ratings.predict(r, day["home_id"], day["away_id"], day["neutral"])
             out.append(day.reset_index(drop=True).join(p).assign(games_before=r["games"]))
-        final = ratings.fit(ts, ts["date"].max() + pd.Timedelta(days=1), teams, prior, cfg, league)
+        if len(ts):
+            final = ratings.fit(ts, ts["date"].max() + pd.Timedelta(days=1), teams, prior, cfg, league)
     return pd.concat(out, ignore_index=True)
 
 

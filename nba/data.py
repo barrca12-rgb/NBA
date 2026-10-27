@@ -100,7 +100,7 @@ def season_games(season: int, refresh: bool = False) -> tuple[pd.DataFrame, pd.D
     return g.reset_index(drop=True), t[t["game_id"].isin(g["game_id"])].reset_index(drop=True)
 
 
-def load(seasons, refresh: bool = False) -> tuple[pd.DataFrame, pd.DataFrame]:
-    parts = [season_games(s, refresh) for s in seasons]
+def load(seasons, refresh: bool = False, refresh_seasons=()) -> tuple[pd.DataFrame, pd.DataFrame]:
+    parts = [season_games(s, refresh or s in refresh_seasons) for s in seasons]
     return (pd.concat([p[0] for p in parts], ignore_index=True),
             pd.concat([p[1] for p in parts], ignore_index=True))

@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tue Oct 27 NBA Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --sunken: #f1f3f6; --line: #e3e6eb; --line-strong: #cfd4db;
+  --text: #101418; --muted: #5d6673; --faint: #8b93a0;
+  --accent: #1f5eff; --pos: #0f7b4b; --pos-bg: #e6f4ed; --neg: #c2352b; --warn: #8a5a00; --warn-bg: #fbf1dc;
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d0f12; --surface: #15181d; --sunken: #1b1f25; --line: #262b33; --line-strong: #353b45;
+    --text: #e8eaed; --muted: #9aa2ae; --faint: #6c7481;
+    --accent: #6b9bff; --pos: #3ccf8e; --pos-bg: #12301f; --neg: #ff6b5e; --warn: #f0b44a; --warn-bg: #33270f;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box }
+.show-sm { display: none }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased }
+a { color: var(--accent); text-decoration: none } a:hover { text-decoration: underline }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px }
+
+/* Top bar */
+.top { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5 }
+.top .wrap { display: flex; align-items: center; gap: 20px; height: 52px }
+.brand { font-weight: 700; letter-spacing: -.01em; font-size: 15px; white-space: nowrap }
+.tabs { display: flex; gap: 2px; height: 100% }
+.tabs a { display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; text-decoration: none }
+.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--text) }
+.status { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; min-width: 0 }
+.status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+button { font: inherit; font-weight: 600; font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: 6px; padding: 6px 12px; cursor: pointer } button:hover { background: var(--sunken) } button:disabled { opacity: .5; cursor: progress }
+
+/* Page head */
+.head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 24px 0 16px }
+h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin: 0 }
+.sub { color: var(--muted); margin-top: 2px }
+.days { display: flex; gap: 4px; flex-wrap: wrap }
+.days a { padding: 5px 10px; border-radius: 6px; color: var(--muted); font-weight: 500; font-size: 13px; text-decoration: none; border: 1px solid transparent }
+.days a:hover { background: var(--sunken) }
+.days a[aria-current="page"] { color: var(--text); border-color: var(--line-strong); background: var(--surface) }
+.notice { border: 1px solid var(--line); background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 13px }
+
+/* KPI strip */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-bottom: 24px; overflow: hidden }
+.kpi { padding: 12px 16px; border-right: 1px solid var(--line) } .kpi:last-child { border-right: 0 }
+.kpi .k { color: var(--muted); font-size: 12px; font-weight: 500 } .kpi .v { font-size: 18px; font-weight: 600; margin-top: 2px; letter-spacing: -.01em }
+.kpi .v small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 4px }
+
+/* Panels and tables */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 24px; overflow: hidden }
+.panel-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line) }
+.panel-h h2 { font-size: 15px; font-weight: 600; margin: 0 } .panel-h .note { color: var(--muted); font-size: 12px }
+.scroll { overflow-x: auto }
+table { width: 100%; border-collapse: collapse; font-size: 13px }
+th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--sunken); white-space: nowrap }
+td { padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: middle }
+tbody tr:last-child td { border-bottom: 0 }
+.r { text-align: right } .c { text-align: center } .m { color: var(--muted) } .f { color: var(--faint) }
+.pos { color: var(--pos) } .neg { color: var(--neg) } .b { font-weight: 600 }
+.empty { padding: 28px 16px; color: var(--muted); text-align: center }
+.betlink { font-weight: 600; font-size: 12px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 10px; color: var(--text); display: inline-block }
+.betlink:hover { background: var(--sunken); text-decoration: none }
+.tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--muted) }
+.tag.bet { color: var(--pos); border-color: var(--pos); background: var(--pos-bg) }
+
+/* Segmented control */
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 6px; overflow: hidden }
+.seg button { border: 0; border-radius: 0; padding: 5px 12px; color: var(--muted); font-weight: 500; background: transparent }
+.seg button + button { border-left: 1px solid var(--line-strong) }
+.seg button[aria-pressed="true"] { background: var(--text); color: var(--surface) }
+.ctrls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; cursor: pointer }
+
+/* Odds board: two rows per game (away, home) */
+.board td { padding-top: 6px; padding-bottom: 6px }
+.board tbody.g tr:first-child td { padding-top: 10px } .board tbody.g tr:last-child td { padding-bottom: 10px; border-bottom: 1px solid var(--line) }
+.board tbody.g tr:first-child td { border-bottom: 0 }
+.board tbody.g:last-child tr:last-child td { border-bottom: 0 }
+.board .team { font-weight: 500 }
+.inj { color: var(--warn); font-size: 11px; font-weight: 500; white-space: normal; max-width: 340px; margin-top: 1px } .board .tm { width: 72px; color: var(--muted); font-size: 12px }
+.board .pts { color: var(--muted); width: 40px }
+.odd { display: inline-flex; flex-direction: column; align-items: flex-end; min-width: 64px; padding: 3px 8px; border-radius: 6px; line-height: 1.25; color: var(--text); text-decoration: none }
+.odd small { color: var(--faint); font-size: 11px }
+a.odd:hover { background: var(--sunken); text-decoration: none }
+.odd.best { background: var(--pos-bg); color: var(--pos) } .odd.best small { color: var(--pos) }
+.na { color: var(--faint) }
+.board th.bk, .board td.bk { text-align: right; width: 96px }
+.board tbody.g.has-bet { background: linear-gradient(90deg, var(--pos) 0 2px, transparent 2px) }
+
+details.panel > summary { list-style: none; cursor: pointer; padding: 12px 16px; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between }
+details.panel > summary::after { content: "Show"; color: var(--accent); font-size: 13px; font-weight: 500 }
+details.panel[open] > summary::after { content: "Hide" }
+details.panel[open] > summary { border-bottom: 1px solid var(--line) }
+footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 80ch }
+
+@media (max-width: 720px) {
+  .top .wrap { gap: 12px } .status span { display: none }
+  h1 { font-size: 19px }
+  .kpi { border-right: 0; border-bottom: 1px solid var(--line) } .kpi:last-child { border-bottom: 0 }
+  .hide-sm { display: none } .show-sm { display: inline }
+  td, th { padding-left: 10px; padding-right: 10px }
+  #t-plays td:first-child, #t-leans td:first-child { white-space: normal; min-width: 150px }
+}
+</style>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="https://barrca12-rgb.github.io/" style="color:inherit;text-decoration:none">Model Card</a>
+  <nav class="tabs" aria-label="Sport"><a href="https://barrca12-rgb.github.io/NFL/">NFL</a><a href="https://barrca12-rgb.github.io/CBB/"><span class="hide-sm">College Basketball</span><span class="show-sm">CBB</span></a><a href="./" aria-current="page">NBA</a></nav>
+  <div class="status"><span id="upd-status"></span><button id="upd-btn" type="button">Update</button></div>
+</div></header>
+
+<main class="wrap">
+  <div class="head">
+    <div><h1 id="h1"></h1><div class="sub" id="sub"></div></div>
+    <nav class="days" id="days" aria-label="Days"></nav>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="panel" aria-labelledby="plays-h">
+    <div class="panel-h"><h2 id="plays-h">Plays</h2><span class="note">Totals only: edge 4+ pts vs the best number, price −130 or better, 1 unit each. Win % = backtest rate at that edge vs openers. A play is logged at the number it first appears.</span></div>
+    <div class="scroll"><table id="t-plays"></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="leans-h" id="leans-sec">
+    <div class="panel-h"><h2 id="leans-h">Spread leans</h2><span class="note">Spread edge 3+ pts. Tracked, not bet: the backtest edge on spreads (about 55% at the opener) is too thin to stake yet.</span></div>
+    <div class="scroll"><table id="t-leans"></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="board-h">
+    <div class="panel-h"><h2 id="board-h">Odds board</h2>
+      <div class="ctrls">
+        <div class="seg" role="group" aria-label="Market"><button data-m="total" aria-pressed="true">Total</button><button data-m="spread">Spread</button><button data-m="ml">Moneyline</button></div>
+        <label class="chk"><input type="checkbox" id="only-plays"> Plays only</label>
+      </div>
+    </div>
+    <div class="scroll"><table class="board" id="t-board"></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="watch-h" id="watch-sec">
+    <div class="panel-h"><h2 id="watch-h">Watch list</h2><span class="note">Total becomes a play if the line reaches the number shown.</span></div>
+    <div class="scroll"><table id="t-watch"></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="rec-h" id="rec-sec" hidden>
+    <div class="panel-h"><h2 id="rec-h">Record</h2><span class="note">Forward test from Oct 27, 2026. Every play graded at the number it first appeared. CLV = points better than the closing line.</span></div>
+    <div class="scroll"><table id="t-rec"></table></div>
+  </section>
+
+  <details class="panel" id="recent-sec" hidden><summary>Recent results</summary><div class="scroll"><table id="t-recent"></table></div></details>
+  <details class="panel"><summary>Power ratings</summary><div class="scroll"><table id="t-rat"></table></div></details>
+
+  <footer>
+    Projections combine opponent-adjusted efficiency and pace ratings from every NBA box score this season with LUMA ARC
+    player ratings for who played in each team's last game (lumahoops.org), rest, back-to-backs, travel, altitude, home court,
+    late-season and playoff scoring, and an in-season bias check. The line is never an input. In a 2023-24 to 2025-26 backtest,
+    totals at 4+ points won 58.8% against opening lines (1,130 plays) and the model broke even against closing lines, so the
+    value is in betting early. Spreads reached about 55% and are tracked only. <a id="bt-link" href="#">Research log</a>.
+  </footer>
+</main>
+
+<script id="data" type="application/json">{"date": "2026-10-27", "season": 2027, "repo": "barrca12-rgb/NBA", "site": "https://barrca12-rgb.github.io/", "generated_at": "2026-10-27T18:12:18+00:00", "games": [{"game_id": 401909880, "start": "2026-10-28 03:00:00+00:00", "home": "LAL", "away": "POR", "home_name": "Los Angeles Lakers", "away_name": "Portland Trail Blazers", "neutral": false, "home_rest": 2.0, "away_rest": 4.0, "home_avail_net": 8.461, "away_avail_net": 5.59, "home_usual_net": 9.261, "away_usual_net": 2.647, "model_margin": -0.062, "model_total": 228.617, "model_home_pts": 114.278, "model_away_pts": 114.34, "model_home_spread": 0.062, "p_home_win": 0.498, "n_books": 5, "book_lines": [{"book": "FanDuel", "home_spread": -2.5, "home_spread_odds": -104.0, "away_spread_odds": -118.0, "total": 234.5, "over_odds": -105.0, "under_odds": -115.0, "home_ml": -126.0, "away_ml": 108.0, "home_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914977&selectionId=5368712", "away_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914977&selectionId=237480", "over_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194241039&selectionId=7017823", "under_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194241039&selectionId=7017824", "home_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914976&selectionId=5368712", "away_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914976&selectionId=237480"}, {"book": "BetMGM", "home_spread": -2.5, "home_spread_odds": -105.0, "away_spread_odds": -115.0, "total": 233.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -125.0, "away_ml": 105.0, "home_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030818?options=20030818-1571948622-2333417592", "away_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030818?options=20030818-1571948622-2333417590", "over_link": "https://sports.nj.betmgm.com/en/sports/events/20030818?options=20030818-1571948651-2333417644", "under_link": "https://sports.nj.betmgm.com/en/sports/events/20030818?options=20030818-1571948651-2333417661", "home_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030818?options=20030818-1569400316-2326523655", "away_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030818?options=20030818-1569400316-2326523654"}, {"book": "DraftKings", "home_spread": -1.5, "home_spread_odds": -115.0, "away_spread_odds": -105.0, "total": 233.5, "over_odds": -108.0, "under_odds": -112.0, "home_ml": -125.0, "away_ml": 105.0, "home_spread_link": "https://sportsbook.draftkings.com/event/34901566?outcomes=0HC86931397N150_1", "away_spread_link": "https://sportsbook.draftkings.com/event/34901566?outcomes=0HC86931397P150_3", "over_link": "https://sportsbook.draftkings.com/event/34901566?outcomes=0OU86931397O23350_1", "under_link": "https://sportsbook.draftkings.com/event/34901566?outcomes=0OU86931397U23350_3", "home_ml_link": "https://sportsbook.draftkings.com/event/34901566?outcomes=0ML86931397_1", "away_ml_link": "https://sportsbook.draftkings.com/event/34901566?outcomes=0ML86931397_3"}, {"book": "theScore Bet", "home_spread": -1.5, "home_spread_odds": -115.0, "away_spread_odds": -105.0, "total": 233.5, "over_odds": -115.0, "under_odds": -105.0, "home_ml": -125.0, "away_ml": 105.0, "home_spread_link": "https://espnbet.app.link/?market_selection_id[0]=f4ebef24-d09b-4e62-aeac-946cbe10a957&odds_numerator[0]=2&odds_denominator[0]=1", "away_spread_link": "https://espnbet.app.link/?market_selection_id[0]=9414422d-cd75-4abe-a0d0-f6a9c9064b83&odds_numerator[0]=2&odds_denominator[0]=1", "over_link": "https://espnbet.app.link/?market_selection_id[0]=87c25f29-c1ac-4296-a277-f5c8e30f381b&odds_numerator[0]=2&odds_denominator[0]=1", "under_link": "https://espnbet.app.link/?market_selection_id[0]=489710c9-6f6e-4d25-a70d-5669d88645d0&odds_numerator[0]=2&odds_denominator[0]=1", "home_ml_link": "https://espnbet.app.link/?market_selection_id[0]=b2927d0b-e150-4d70-bb89-1bb79fb4c226&odds_numerator[0]=2&odds_denominator[0]=1", "away_ml_link": "https://espnbet.app.link/?market_selection_id[0]=5c4958a1-f104-4236-a681-0c3195d2e611&odds_numerator[0]=2&odds_denominator[0]=1"}, {"book": "Caesars", "home_spread": null, "home_spread_odds": null, "away_spread_odds": null, "total": 233.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -125.0, "away_ml": 105.0, "home_spread_link": null, "away_spread_link": null, "over_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=2d5c060e-ded6-3789-a2f4-1fba7fec2597", "under_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=9409b913-249c-3723-940e-bd4dd3444f2b", "home_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=1d7f4f20-60bf-3b86-a308-a314555371cf", "away_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=74e967dd-e94e-3f6a-a260-36bc2ce5d8bf"}], "sgo_event": "jHX9XeeKJsLkc910NrDz", "open_total": 235.0, "open_home_spread": -3.0, "first_seen": "2026-10-27T18:03:33+00:00", "total_verdict": "BET", "total_pick": "Under", "total_line": 234.5, "total_odds": -115.0, "total_book": "FanDuel", "total_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194241039&selectionId=7017824", "total_edge": 5.88, "total_p": 0.557, "total_ev": 0.041, "total_good_to": 232.617, "total_units": 1.0, "spread_verdict": null, "spread_side": "away", "spread_pick": "POR", "spread_line": 2.5, "spread_odds": -115.0, "spread_book": "BetMGM", "spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030818?options=20030818-1571948622-2333417590", "spread_edge": 2.56, "spread_p": 0.545}, {"game_id": 401909878, "start": "2026-10-28 00:00:00+00:00", "home": "NY", "away": "DET", "home_name": "New York Knicks", "away_name": "Detroit Pistons", "neutral": false, "home_rest": 2.0, "away_rest": 2.0, "home_avail_net": 3.64, "away_avail_net": 5.732, "home_usual_net": 4.302, "away_usual_net": 6.968, "model_margin": -0.939, "model_total": 217.381, "model_home_pts": 108.221, "model_away_pts": 109.16, "model_home_spread": 0.939, "p_home_win": 0.47, "n_books": 5, "book_lines": [{"book": "FanDuel", "home_spread": -4.5, "home_spread_odds": -108.0, "away_spread_odds": -112.0, "total": 218.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -166.0, "away_ml": 140.0, "home_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914974&selectionId=237482", "away_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914974&selectionId=237474", "over_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194238794&selectionId=7017823", "under_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194238794&selectionId=7017824", "home_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914975&selectionId=237482", "away_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914975&selectionId=237474"}, {"book": "Caesars", "home_spread": -4.5, "home_spread_odds": -105.0, "away_spread_odds": -115.0, "total": null, "over_odds": null, "under_odds": null, "home_ml": -165.0, "away_ml": 140.0, "home_spread_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=48312e25-67e6-3ddb-8e41-c19d2e9b82e9", "away_spread_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=d1527078-ffba-363b-912d-2368c2c0e34a", "over_link": null, "under_link": null, "home_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=22765b8d-dae8-3562-8c26-3f1c32e841dd", "away_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=4c1db024-9b93-38b0-9e5e-beb91f6ff39c"}, {"book": "BetMGM", "home_spread": -4.5, "home_spread_odds": -105.0, "away_spread_odds": -115.0, "total": 218.5, "over_odds": -115.0, "under_odds": -105.0, "home_ml": -170.0, "away_ml": 140.0, "home_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030816?options=20030816-1571945744-2333409533", "away_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030816?options=20030816-1571945744-2333409532", "over_link": "https://sports.nj.betmgm.com/en/sports/events/20030816?options=20030816-1571945695-2333409400", "under_link": "https://sports.nj.betmgm.com/en/sports/events/20030816?options=20030816-1571945695-2333409401", "home_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030816?options=20030816-1569400309-2326523649", "away_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030816?options=20030816-1569400309-2326523648"}, {"book": "DraftKings", "home_spread": -4.5, "home_spread_odds": -105.0, "away_spread_odds": -115.0, "total": 219.5, "over_odds": -108.0, "under_odds": -112.0, "home_ml": -170.0, "away_ml": 142.0, "home_spread_link": "https://sportsbook.draftkings.com/event/34901563?outcomes=0HC86931384N450_1", "away_spread_link": "https://sportsbook.draftkings.com/event/34901563?outcomes=0HC86931384P450_3", "over_link": "https://sportsbook.draftkings.com/event/34901563?outcomes=0OU86931384O21950_1", "under_link": "https://sportsbook.draftkings.com/event/34901563?outcomes=0OU86931384U21950_3", "home_ml_link": "https://sportsbook.draftkings.com/event/34901563?outcomes=0ML86931384_1", "away_ml_link": "https://sportsbook.draftkings.com/event/34901563?outcomes=0ML86931384_3"}, {"book": "theScore Bet", "home_spread": -3.5, "home_spread_odds": -115.0, "away_spread_odds": -105.0, "total": 219.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -155.0, "away_ml": 135.0, "home_spread_link": "https://espnbet.app.link/?market_selection_id[0]=225d2fb4-2907-4fe2-a7ce-e3fe725a6abd&odds_numerator[0]=2&odds_denominator[0]=1", "away_spread_link": "https://espnbet.app.link/?market_selection_id[0]=ff4ad059-75ce-4d2e-81a6-d6b508e67339&odds_numerator[0]=2&odds_denominator[0]=1", "over_link": "https://espnbet.app.link/?market_selection_id[0]=244d80e0-13cd-4fe9-b0ae-70e2a64a9290&odds_numerator[0]=2&odds_denominator[0]=1", "under_link": "https://espnbet.app.link/?market_selection_id[0]=69c73f79-bb31-4277-808e-ca13d18640ff&odds_numerator[0]=2&odds_denominator[0]=1", "home_ml_link": "https://espnbet.app.link/?market_selection_id[0]=6caa7fcb-d9c8-40c4-bcab-aeb4c750895f&odds_numerator[0]=2&odds_denominator[0]=1", "away_ml_link": "https://espnbet.app.link/?market_selection_id[0]=c78dd551-2ad8-4162-930e-2ecfc1a61025&odds_numerator[0]=2&odds_denominator[0]=1"}], "sgo_event": "nluHRog9os3byvlgmEWZ", "open_total": 220.5, "open_home_spread": -6.5, "first_seen": "2026-10-27T18:03:33+00:00", "total_verdict": null, "total_pick": "Under", "total_line": 219.5, "total_odds": -110.0, "total_book": "theScore Bet", "total_link": "https://espnbet.app.link/?market_selection_id[0]=69c73f79-bb31-4277-808e-ca13d18640ff&odds_numerator[0]=2&odds_denominator[0]=1", "total_edge": 2.12, "total_p": 0.557, "total_ev": 0.063, "total_good_to": 221.381, "total_units": 1.0, "spread_verdict": "LEAN", "spread_side": "away", "spread_pick": "DET", "spread_line": 4.5, "spread_odds": -112.0, "spread_book": "FanDuel", "spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914974&selectionId=237474", "spread_edge": 5.44, "spread_p": 0.545}, {"game_id": 401909879, "start": "2026-10-28 00:00:00+00:00", "home": "SA", "away": "SAC", "home_name": "San Antonio Spurs", "away_name": "Sacramento Kings", "neutral": false, "home_rest": 3.0, "away_rest": 2.0, "home_avail_net": 10.707, "away_avail_net": -5.549, "home_usual_net": 9.665, "away_usual_net": -4.435, "model_margin": 15.559, "model_total": 230.799, "model_home_pts": 123.179, "model_away_pts": 107.62, "model_home_spread": -15.559, "p_home_win": 0.893, "n_books": 5, "book_lines": [{"book": "FanDuel", "home_spread": -18.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": 232.5, "over_odds": -106.0, "under_odds": -114.0, "home_ml": -2000.0, "away_ml": 1040.0, "home_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914973&selectionId=237471", "away_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914973&selectionId=237470", "over_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194240664&selectionId=7017823", "under_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194240664&selectionId=7017824", "home_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914972&selectionId=237471", "away_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914972&selectionId=237470"}, {"book": "Caesars", "home_spread": -18.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": 232.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -2000.0, "away_ml": 1050.0, "home_spread_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=5972e347-8c99-3eb0-b24c-048d5a180bfe", "away_spread_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=4e7e22a2-da44-35b1-be36-0a899b80ffb8", "over_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=df10d7e2-b830-3403-a601-1a76a2f7fbd9", "under_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=2e29b6d2-b82c-35e1-bbe8-6f1c53191656", "home_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=184f8f97-ef74-3495-bc87-c9f333fd4da8", "away_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=213640cf-78f5-3955-9b12-f2834f9d2107"}, {"book": "DraftKings", "home_spread": -18.5, "home_spread_odds": -108.0, "away_spread_odds": -112.0, "total": 232.5, "over_odds": -108.0, "under_odds": -112.0, "home_ml": -1650.0, "away_ml": 950.0, "home_spread_link": "https://sportsbook.draftkings.com/event/34901564?outcomes=0HC86931385N1850_1", "away_spread_link": "https://sportsbook.draftkings.com/event/34901564?outcomes=0HC86931385P1850_3", "over_link": "https://sportsbook.draftkings.com/event/34901564?outcomes=0OU86931385O23250_1", "under_link": "https://sportsbook.draftkings.com/event/34901564?outcomes=0OU86931385U23250_3", "home_ml_link": "https://sportsbook.draftkings.com/event/34901564?outcomes=0ML86931385_1", "away_ml_link": "https://sportsbook.draftkings.com/event/34901564?outcomes=0ML86931385_3"}, {"book": "BetMGM", "home_spread": -18.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": 232.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -2000.0, "away_ml": 1000.0, "home_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030817?options=20030817-1571948496-2333417292", "away_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030817?options=20030817-1571948496-2333417291", "over_link": "https://sports.nj.betmgm.com/en/sports/events/20030817?options=20030817-1571948479-2333417247", "under_link": "https://sports.nj.betmgm.com/en/sports/events/20030817?options=20030817-1571948479-2333417250", "home_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030817?options=20030817-1569400312-2326523651", "away_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030817?options=20030817-1569400312-2326523650"}, {"book": "theScore Bet", "home_spread": -18.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": 232.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -1800.0, "away_ml": 900.0, "home_spread_link": "https://espnbet.app.link/?market_selection_id[0]=7db25874-1b7f-4e4a-9277-063967708402&odds_numerator[0]=2&odds_denominator[0]=1", "away_spread_link": "https://espnbet.app.link/?market_selection_id[0]=acb4f452-8b36-4b0e-bf60-4ea784bcd4b7&odds_numerator[0]=2&odds_denominator[0]=1", "over_link": "https://espnbet.app.link/?market_selection_id[0]=bc1aa389-4c09-4f17-81cd-7bba4d673632&odds_numerator[0]=2&odds_denominator[0]=1", "under_link": "https://espnbet.app.link/?market_selection_id[0]=96decd58-b247-4f18-845b-548cd779be69&odds_numerator[0]=2&odds_denominator[0]=1", "home_ml_link": "https://espnbet.app.link/?market_selection_id[0]=14398bed-3ad8-4bea-b54d-216a4eb69c53&odds_numerator[0]=2&odds_denominator[0]=1", "away_ml_link": "https://espnbet.app.link/?market_selection_id[0]=76220058-1d2f-42c0-bc4d-9f2d3af45694&odds_numerator[0]=2&odds_denominator[0]=1"}], "sgo_event": "LSAP9CHT1dRVpWfZmju8", "open_total": 231.0, "open_home_spread": -17.0, "first_seen": "2026-10-27T18:03:33+00:00", "total_verdict": null, "total_pick": "Under", "total_line": 232.5, "total_odds": -110.0, "total_book": "Caesars", "total_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=2e29b6d2-b82c-35e1-bbe8-6f1c53191656", "total_edge": 1.7, "total_p": 0.557, "total_ev": 0.063, "total_good_to": 234.799, "total_units": 1.0, "spread_verdict": null, "spread_side": "away", "spread_pick": "SAC", "spread_line": 18.5, "spread_odds": -110.0, "spread_book": "FanDuel", "spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914973&selectionId=237470", "spread_edge": 2.94, "spread_p": 0.545}, {"game_id": 401909877, "start": "2026-10-27 23:30:00+00:00", "home": "BOS", "away": "BKN", "home_name": "Boston Celtics", "away_name": "Brooklyn Nets", "neutral": false, "home_rest": 1.0, "away_rest": 2.0, "home_avail_net": 6.773, "away_avail_net": -7.321, "home_usual_net": 7.861, "away_usual_net": -2.495, "model_margin": 11.25, "model_total": 220.407, "model_home_pts": 115.828, "model_away_pts": 104.579, "model_home_spread": -11.25, "p_home_win": 0.816, "n_books": 5, "book_lines": [{"book": "FanDuel", "home_spread": -12.5, "home_spread_odds": -114.0, "away_spread_odds": -106.0, "total": 222.5, "over_odds": -114.0, "under_odds": -106.0, "home_ml": -650.0, "away_ml": 480.0, "home_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914990&selectionId=60427", "away_spread_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914990&selectionId=6500320", "over_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194240515&selectionId=7017823", "under_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194240515&selectionId=7017824", "home_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914991&selectionId=60427", "away_ml_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.193914991&selectionId=6500320"}, {"book": "Caesars", "home_spread": -12.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": 222.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -650.0, "away_ml": 460.0, "home_spread_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=b52921ac-d0ae-3d72-b276-485703ef7f57", "away_spread_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=16ef3e7b-eb82-31a7-b638-ea291bad5b3e", "over_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=9f99dfd3-0b25-3d57-8fd8-9bcd809d9f15", "under_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=eb5675dd-77f4-3a95-86eb-211c76b4a1ef", "home_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=848df060-29f0-3764-80c4-59690468e127", "away_ml_link": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=5301d71c-c985-3d88-9466-0f816221aeb3"}, {"book": "DraftKings", "home_spread": -12.5, "home_spread_odds": -108.0, "away_spread_odds": -112.0, "total": 222.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -625.0, "away_ml": 455.0, "home_spread_link": "https://sportsbook.draftkings.com/event/34901557?outcomes=0HC86931378N1250_1", "away_spread_link": "https://sportsbook.draftkings.com/event/34901557?outcomes=0HC86931378P1250_3", "over_link": "https://sportsbook.draftkings.com/event/34901557?outcomes=0OU86931378O22250_1", "under_link": "https://sportsbook.draftkings.com/event/34901557?outcomes=0OU86931378U22250_3", "home_ml_link": "https://sportsbook.draftkings.com/event/34901557?outcomes=0ML86931378_1", "away_ml_link": "https://sportsbook.draftkings.com/event/34901557?outcomes=0ML86931378_3"}, {"book": "BetMGM", "home_spread": -12.5, "home_spread_odds": -110.0, "away_spread_odds": -110.0, "total": 222.5, "over_odds": -110.0, "under_odds": -110.0, "home_ml": -625.0, "away_ml": 450.0, "home_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030815?options=20030815-1571948266-2333416728", "away_spread_link": "https://sports.nj.betmgm.com/en/sports/events/20030815?options=20030815-1571948266-2333416727", "over_link": "https://sports.nj.betmgm.com/en/sports/events/20030815?options=20030815-1571948278-2333416759", "under_link": "https://sports.nj.betmgm.com/en/sports/events/20030815?options=20030815-1571948278-2333416760", "home_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030815?options=20030815-1569400306-2326523647", "away_ml_link": "https://sports.nj.betmgm.com/en/sports/events/20030815?options=20030815-1569400306-2326523646"}, {"book": "theScore Bet", "home_spread": -12.5, "home_spread_odds": -115.0, "away_spread_odds": -105.0, "total": 221.5, "over_odds": -115.0, "under_odds": -105.0, "home_ml": -750.0, "away_ml": 475.0, "home_spread_link": "https://espnbet.app.link/?market_selection_id[0]=168aa86c-b705-494f-9846-5621de1d6368&odds_numerator[0]=2&odds_denominator[0]=1", "away_spread_link": "https://espnbet.app.link/?market_selection_id[0]=efcf8dc9-89c5-4683-8734-64df47f33100&odds_numerator[0]=2&odds_denominator[0]=1", "over_link": "https://espnbet.app.link/?market_selection_id[0]=25debb31-a27a-4b60-8b7c-f78742559b3d&odds_numerator[0]=2&odds_denominator[0]=1", "under_link": "https://espnbet.app.link/?market_selection_id[0]=e9430c1f-6636-4e3a-94d2-8fffd459483c&odds_numerator[0]=2&odds_denominator[0]=1", "home_ml_link": "https://espnbet.app.link/?market_selection_id[0]=2b95a66b-68f9-4ff6-af28-82625d9750c9&odds_numerator[0]=2&odds_denominator[0]=1", "away_ml_link": "https://espnbet.app.link/?market_selection_id[0]=2558f335-ae10-4141-9de8-cccf3be326e9&odds_numerator[0]=2&odds_denominator[0]=1"}], "sgo_event": "rUjWV08soeK4AjGkuLBG", "open_total": 225.0, "open_home_spread": -14.0, "first_seen": "2026-10-27T18:03:33+00:00", "total_verdict": null, "total_pick": "Under", "total_line": 222.5, "total_odds": -106.0, "total_book": "FanDuel", "total_link": "https://sportsbook.fanduel.com/addToBetslip?marketId=717.194240515&selectionId=7017824", "total_edge": 2.09, "total_p": 0.557, "total_ev": 0.082, "total_good_to": 224.407, "total_units": 1.0, "spread_verdict": null, "spread_side": "away", "spread_pick": "BKN", "spread_line": 12.5, "spread_odds": -105.0, "spread_book": "theScore Bet", "spread_link": "https://espnbet.app.link/?market_selection_id[0]=efcf8dc9-89c5-4683-8734-64df47f33100&odds_numerator[0]=2&odds_denominator[0]=1", "spread_edge": 1.25, "spread_p": 0.545}], "ratings": [{"rank": 1, "team": "Oklahoma City Thunder", "net": 6.572, "adj_oe": 110.496, "adj_de": 103.924, "adj_tempo": 103.583}, {"rank": 2, "team": "San Antonio Spurs", "net": 5.728, "adj_oe": 110.569, "adj_de": 104.841, "adj_tempo": 104.656}, {"rank": 3, "team": "Detroit Pistons", "net": 4.261, "adj_oe": 110.011, "adj_de": 105.75, "adj_tempo": 102.525}, {"rank": 4, "team": "Boston Celtics", "net": 4.149, "adj_oe": 111.064, "adj_de": 106.916, "adj_tempo": 102.232}, {"rank": 5, "team": "New York Knicks", "net": 4.145, "adj_oe": 109.313, "adj_de": 105.168, "adj_tempo": 102.522}, {"rank": 6, "team": "Minnesota Timberwolves", "net": 4.133, "adj_oe": 110.119, "adj_de": 105.986, "adj_tempo": 103.932}, {"rank": 7, "team": "Portland Trail Blazers", "net": 3.772, "adj_oe": 110.193, "adj_de": 106.421, "adj_tempo": 104.012}, {"rank": 8, "team": "Houston Rockets", "net": 3.681, "adj_oe": 111.55, "adj_de": 107.869, "adj_tempo": 102.329}, {"rank": 9, "team": "Atlanta Hawks", "net": 3.595, "adj_oe": 111.452, "adj_de": 107.857, "adj_tempo": 106.029}, {"rank": 10, "team": "Toronto Raptors", "net": 2.853, "adj_oe": 108.522, "adj_de": 105.669, "adj_tempo": 104.983}, {"rank": 11, "team": "Los Angeles Lakers", "net": 1.827, "adj_oe": 111.344, "adj_de": 109.518, "adj_tempo": 103.362}, {"rank": 12, "team": "LA Clippers", "net": 1.207, "adj_oe": 109.263, "adj_de": 108.056, "adj_tempo": 104.13}, {"rank": 13, "team": "Cleveland Cavaliers", "net": 0.907, "adj_oe": 109.748, "adj_de": 108.841, "adj_tempo": 105.073}, {"rank": 14, "team": "Philadelphia 76ers", "net": 0.804, "adj_oe": 107.671, "adj_de": 106.867, "adj_tempo": 105.738}, {"rank": 15, "team": "Charlotte Hornets", "net": -0.131, "adj_oe": 108.286, "adj_de": 108.417, "adj_tempo": 101.79}, {"rank": 16, "team": "Orlando Magic", "net": -0.142, "adj_oe": 107.544, "adj_de": 107.687, "adj_tempo": 105.452}, {"rank": 17, "team": "Denver Nuggets", "net": -0.611, "adj_oe": 110.996, "adj_de": 111.607, "adj_tempo": 102.108}, {"rank": 18, "team": "Phoenix Suns", "net": -1.557, "adj_oe": 109.633, "adj_de": 111.19, "adj_tempo": 103.094}, {"rank": 19, "team": "Miami Heat", "net": -1.816, "adj_oe": 109.236, "adj_de": 111.052, "adj_tempo": 106.02}, {"rank": 20, "team": "Golden State Warriors", "net": -1.817, "adj_oe": 110.229, "adj_de": 112.046, "adj_tempo": 102.995}, {"rank": 21, "team": "New Orleans Pelicans", "net": -2.305, "adj_oe": 110.097, "adj_de": 112.403, "adj_tempo": 105.545}, {"rank": 22, "team": "Indiana Pacers", "net": -2.349, "adj_oe": 108.51, "adj_de": 110.858, "adj_tempo": 105.014}, {"rank": 23, "team": "Dallas Mavericks", "net": -2.366, "adj_oe": 108.407, "adj_de": 110.774, "adj_tempo": 104.981}, {"rank": 24, "team": "Memphis Grizzlies", "net": -2.505, "adj_oe": 108.012, "adj_de": 110.518, "adj_tempo": 104.174}, {"rank": 25, "team": "Utah Jazz", "net": -4.772, "adj_oe": 108.057, "adj_de": 112.829, "adj_tempo": 105.495}, {"rank": 26, "team": "Washington Wizards", "net": -4.897, "adj_oe": 107.942, "adj_de": 112.839, "adj_tempo": 104.906}, {"rank": 27, "team": "Sacramento Kings", "net": -4.917, "adj_oe": 108.458, "adj_de": 113.374, "adj_tempo": 103.957}, {"rank": 28, "team": "Chicago Bulls", "net": -5.031, "adj_oe": 106.781, "adj_de": 111.811, "adj_tempo": 108.875}, {"rank": 29, "team": "Milwaukee Bucks", "net": -5.608, "adj_oe": 107.478, "adj_de": 113.086, "adj_tempo": 104.212}, {"rank": 30, "team": "Brooklyn Nets", "net": -6.81, "adj_oe": 104.615, "adj_de": 111.426, "adj_tempo": 105.157}], "record": {"status": {"totals": {"bets": 0, "w": 0, "l": 0, "p": 0, "win": null, "units": 0.0, "roi": null, "clv_pts": null, "beat_close": null, "open": 2}, "spread leans": {"bets": 0, "w": 0, "l": 0, "p": 0, "win": null, "units": 0.0, "roi": null, "clv_pts": null, "beat_close": null, "open": 1}}, "recent": []}, "usage": {"used": 5587, "max": 100000}}</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+  const sgn = (x, d = 1) => x == null ? "–" : (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(d).replace(/\.0+$/, "");
+  const ln = (x) => x == null ? "–" : Math.abs(x) < 0.05 ? "PK" : sgn(x);
+  const num = (x, d = 1) => x == null ? "–" : Number(x).toFixed(d).replace(/\.0$/, "");
+  const odds = (x) => x == null ? "" : (x > 0 ? "+" : "−") + Math.abs(Math.round(x));
+  const pct = (x) => x == null ? "–" : (100 * x).toFixed(1) + "%";
+  const playAt = (v, higherBetter) => v == null ? null : (higherBetter ? Math.ceil(v * 2 - 1e-9) : Math.floor(v * 2 + 1e-9)) / 2;
+  const day = new Date(D.date + "T12:00:00");
+  const tip = (g) => g.start ? new Date(g.start).toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit", timeZone: "America/New_York"}) : "";
+  const matchup = (g) => g.away + (g.neutral ? " vs " : " @ ") + g.home;
+  const BOOKS = ["FanDuel", "DraftKings", "BetMGM", "Caesars", "Fanatics", "bet365", "theScore Bet"];
+  const bl = (g, bk) => (g.book_lines || []).find((x) => x.book === bk);
+
+  $("bt-link").href = "https://github.com/" + D.repo + "/blob/HEAD/research/LOG.md";
+  $("h1").textContent = day.toLocaleDateString("en-US", {weekday: "long", month: "long", day: "numeric"});
+  const withLines = D.games.filter((g) => g.n_books > 0).length;
+  $("sub").textContent = D.games.length + " games · " + withLines + " with lines · " + (D.season - 1) + "–" + String(D.season).slice(2) + " season";
+
+  const navDays = (list) => {
+    $("days").innerHTML = list.slice(-7).map((d) => '<a href="nba_' + d + '.html"' + (d === D.date ? ' aria-current="page"' : "") + ">" +
+      new Date(d + "T12:00:00").toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}) + "</a>").join("");
+  };
+  navDays([D.date]);
+  fetch("days.json", {cache: "no-store"}).then((r) => r.json()).then((j) => navDays(j.days)).catch(() => {});
+
+  // Plays (totals) and leans (spreads)
+  const P = D.games.filter((g) => g.total_verdict === "BET").map((g) => ({g, bet: g.total_pick + " " + num(g.total_line), price: g.total_odds, book: g.total_book,
+    link: g.total_link, edge: g.total_edge, p: g.total_p, ev: g.total_ev, model: num(g.model_total), to: num(playAt(g.total_good_to, g.total_pick === "Under")),
+    open: g.open_total == null ? null : num(g.open_total), units: g.total_units}));
+  P.sort((a, b) => String(a.g.start).localeCompare(String(b.g.start)) || b.edge - a.edge);
+  const rest = (g) => "Rest " + (g.away_rest == null ? "–" : Math.min(g.away_rest, 7) + "d") + " / " + (g.home_rest == null ? "–" : Math.min(g.home_rest, 7) + "d");
+  const missing = (g) => ["away", "home"].map((sd) => { const u = g[sd + "_usual_net"], a = g[sd + "_avail_net"];
+    return u != null && a != null && u - a > 1 ? g[sd] + " short-handed in last game (" + sgn(a - u) + " ARC)" : ""; }).filter(Boolean).join(" · ");
+  $("t-plays").innerHTML = P.length ? "<thead><tr><th>Bet</th><th>Book</th><th class='r hide-sm'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Win %</th><th class='r'>EV</th><th class='r'>Bet to</th><th class='r hide-sm'>Opened</th><th class='r hide-sm'>Units</th><th></th></tr></thead><tbody>" +
+    P.map((p) => "<tr><td><div class='b'>" + esc(p.bet) + "</div><div class='f' style='font-size:12px'>" + esc(matchup(p.g)) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
+      (missing(p.g) ? "<div class='inj'>" + esc(missing(p.g)) + "</div>" : "") +
+      (p.g.total_warn ? "<div class='inj'>&#9888; " + esc(p.g.total_warn) + "</div>" : "") + "</td><td>" +
+      esc(p.book || "–") + (p.price != null ? " <span class='m'>" + esc(odds(p.price)) + "</span>" : "") + "</td><td class='r m hide-sm'>" + esc(p.model) + "</td><td class='r pos b'>" + sgn(p.edge) +
+      "</td><td class='r m hide-sm'>" + pct(p.p) + "</td><td class='r'>" + (p.ev == null ? "–" : sgn(100 * p.ev) + "%") +
+      "</td><td class='r'>" + esc(p.to) + "</td><td class='r m hide-sm'>" + esc(p.open ?? "–") + "</td><td class='r hide-sm'>" + num(p.units, 2) + "</td><td class='r'>" +
+      (p.link ? "<a class='betlink' href='" + esc(p.link) + "' target='_blank' rel='noopener'>Bet</a>" : "") + "</td></tr>").join("") + "</tbody>"
+    : "<tbody><tr><td class='empty'>" + (withLines ? "No plays. No total is far enough from the model." : "No lines posted yet. Openers usually post the night before.") + "</td></tr></tbody>";
+
+  const Lz = D.games.filter((g) => g.spread_verdict === "LEAN");
+  if (!Lz.length) $("leans-sec").hidden = true;
+  else $("t-leans").innerHTML = "<thead><tr><th>Lean</th><th>Best number</th><th class='r'>Model</th><th class='r'>Edge</th><th class='r hide-sm'>Opened</th></tr></thead><tbody>" +
+    Lz.map((g) => "<tr><td><div class='b'>" + esc(g.spread_pick + " " + ln(g.spread_line)) + "</div><div class='f' style='font-size:12px'>" + esc(matchup(g)) + " · " + esc(tip(g)) + "</div></td><td>" +
+      esc(g.spread_book) + (g.spread_odds != null ? " <span class='m'>" + esc(odds(g.spread_odds)) + "</span>" : "") + "</td><td class='r m'>" +
+      ln(g.spread_side === "home" ? g.model_home_spread : -g.model_home_spread) + "</td><td class='r b'>" + sgn(g.spread_edge) + "</td><td class='r m hide-sm'>" +
+      (g.open_home_spread == null ? "–" : ln(g.spread_side === "home" ? g.open_home_spread : -g.open_home_spread)) + "</td></tr>").join("") + "</tbody>";
+
+  // KPIs
+  const st = D.record ? D.record.status : null;
+  const rec = (s) => s && s.bets ? s.w + "–" + s.l + (s.p ? "–" + s.p : "") : "0–0";
+  const T = st && st.totals, S = st && st["spread leans"];
+  const kp = [["Plays today", P.length + "<small>" + P.length + "u</small>"],
+    ["Totals", rec(T) + "<small>" + (T && T.win != null ? pct(T.win) : "") + "</small>"],
+    ["Units", "<span class='" + (T && T.units > 0 ? "pos" : T && T.units < 0 ? "neg" : "") + "'>" + sgn(T ? T.units : 0, 2) + "</span>"],
+    ["Avg CLV", T && T.clv_pts != null ? sgn(T.clv_pts, 2) + "<small>pts</small>" : "–"],
+    ["Spread leans", rec(S) + "<small>" + (S && S.win != null ? pct(S.win) : "") + "</small>"]];
+  $("kpis").innerHTML = kp.map(([k, v]) => "<div class='kpi'><div class='k'>" + k + "</div><div class='v'>" + v + "</div></div>").join("");
+
+  // Odds board
+  let market = "total";
+  const cell = (val, price, link, best) => val == null ? "<span class='na'>–</span>" :
+    "<" + (link ? "a href='" + esc(link) + "' target='_blank' rel='noopener'" : "span") + " class='odd" + (best ? " best" : "") + "'>" + esc(val) +
+    (price != null ? "<small>" + esc(odds(price)) + "</small>" : "") + "</" + (link ? "a" : "span") + ">";
+  const board = () => {
+    const only = $("only-plays").checked;
+    const G = D.games.filter((g) => !only || g.total_verdict === "BET")
+      .sort((a, b) => String(a.start).localeCompare(String(b.start)) || a.home.localeCompare(b.home));
+    const mh = {spread: "Model", total: "Model", ml: "Win %"}[market];
+    let h = "<thead><tr><th>Time</th><th>Team</th><th class='r'>Proj</th><th class='r'>" + mh + "</th><th class='r hide-sm'>Open</th>" +
+      BOOKS.map((b) => "<th class='bk'>" + b + "</th>").join("") + "<th class='r'>Edge</th></tr></thead>";
+    if (!G.length) { $("t-board").innerHTML = h + "<tbody><tr><td class='empty' colspan='" + (BOOKS.length + 6) + "'>No games.</td></tr></tbody>"; return; }
+    h += G.map((g) => {
+      const hasBet = market === "total" && g.total_verdict === "BET";
+      const rows = ["away", "home"].map((sd, i) => {
+        const pts = g["model_" + sd + "_pts"] == null ? "–" : Math.round(g["model_" + sd + "_pts"]);
+        let model, open = "", bookCells, edge = "";
+        if (market === "spread") {
+          model = ln(sd === "home" ? g.model_home_spread : -g.model_home_spread);
+          open = g.open_home_spread == null ? "–" : ln(sd === "home" ? g.open_home_spread : -g.open_home_spread);
+          const pick = g.spread_side === sd && g.spread_verdict === "LEAN";
+          bookCells = BOOKS.map((bk) => { const x = bl(g, bk); if (!x || x.home_spread == null) return cell(null);
+            const v = sd === "home" ? x.home_spread : -x.home_spread;
+            return cell(ln(v), x[sd + "_spread_odds"], x[sd + "_spread_link"], pick && g.spread_book === bk && v === g.spread_line); });
+          if (pick) edge = "<span class='tag'>Lean " + sgn(g.spread_edge) + "</span>";
+        } else if (market === "total") {
+          const ou = i === 0 ? "over" : "under";
+          model = i === 0 ? num(g.model_total) : "";
+          open = i === 0 ? num(g.open_total) : "";
+          const pick = (g.total_pick || "").toLowerCase() === ou && ["BET", "WATCH"].includes(g.total_verdict);
+          bookCells = BOOKS.map((bk) => { const x = bl(g, bk); if (!x || x.total == null) return cell(null);
+            return cell((i === 0 ? "o" : "u") + num(x.total), x[ou + "_odds"], x[ou + "_link"], pick && g.total_book === bk && x.total === g.total_line); });
+          if (pick && g.total_verdict === "BET") edge = "<span class='tag bet'>BET " + sgn(g.total_edge) + "</span>";
+          else if (pick) edge = "<span class='tag'>Watch · bet at " + ou[0] + num(playAt(g.total_good_to, ou === "under")) + "</span>";
+        } else {
+          const p = sd === "home" ? g.p_home_win : 1 - g.p_home_win;
+          model = p == null ? "–" : Math.round(100 * p) + "%";
+          const prices = BOOKS.map((bk) => (bl(g, bk) || {})[sd + "_ml"]);
+          const ok = prices.filter((v) => v != null), top = Math.max(...ok);
+          bookCells = BOOKS.map((bk, j) => { const x = bl(g, bk); return x && x[sd + "_ml"] != null ? cell(odds(x[sd + "_ml"]), null, x[sd + "_ml_link"], prices[j] === top && ok.length > 1) : cell(null); });
+        }
+        return "<tr>" + (i === 0 ? "<td class='tm' rowspan='2'>" + esc(tip(g)) + "</td>" : "") +
+          "<td class='team'>" + (i === 1 && !g.neutral ? "<span class='f'>@ </span>" : "") + esc(g[sd]) + "</td><td class='r pts'>" + pts + "</td><td class='r b'>" + model + "</td><td class='r m hide-sm'>" + open + "</td>" +
+          bookCells.map((c) => "<td class='bk'>" + c + "</td>").join("") + "<td class='r'>" + edge + "</td></tr>";
+      }).join("");
+      return "<tbody class='g" + (hasBet ? " has-bet" : "") + "'>" + rows + "</tbody>";
+    }).join("");
+    $("t-board").innerHTML = h;
+  };
+  document.querySelectorAll(".seg button").forEach((b) => b.onclick = () => {
+    market = b.dataset.m; document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", x === b)); board(); });
+  $("only-plays").onchange = board;
+  board();
+
+  // Watch list
+  const W = D.games.filter((g) => g.total_verdict === "WATCH");
+  if (!W.length) $("watch-sec").hidden = true;
+  else $("t-watch").innerHTML = "<thead><tr><th>Time</th><th>Game</th><th>Side</th><th class='r'>Now</th><th class='r'>Play at</th><th class='r'>Edge now</th></tr></thead><tbody>" +
+    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + esc(matchup(g)) + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
+      "</td><td class='r'>" + num(playAt(g.total_good_to, g.total_pick === "Under")) + "</td><td class='r m'>" + sgn(g.total_edge) + "</td></tr>").join("") + "</tbody>";
+
+  // Record
+  if (st) {
+    $("rec-sec").hidden = false;
+    $("t-rec").innerHTML = "<thead><tr><th>Market</th><th class='r'>Record</th><th class='r'>Win %</th><th class='r'>Units</th><th class='r'>ROI</th><th class='r'>Avg CLV</th><th class='r'>Beat close</th><th class='r'>Open</th></tr></thead><tbody>" +
+      Object.entries(st).map(([mk, s]) => "<tr><td>" + mk[0].toUpperCase() + mk.slice(1) + "</td><td class='r'>" + rec(s) + "</td><td class='r'>" + pct(s.win) + "</td><td class='r " +
+        (s.units > 0 ? "pos" : s.units < 0 ? "neg" : "") + "'>" + sgn(s.units, 2) + "</td><td class='r'>" + pct(s.roi) + "</td><td class='r'>" + (s.clv_pts == null ? "–" : sgn(s.clv_pts, 2)) +
+        "</td><td class='r'>" + pct(s.beat_close) + "</td><td class='r m'>" + s.open + "</td></tr>").join("") + "</tbody>";
+    const R = D.record.recent || [];
+    if (R.length) {
+      $("recent-sec").hidden = false;
+      $("t-recent").innerHTML = "<thead><tr><th>Date</th><th>Game</th><th>Bet</th><th>Book</th><th class='r'>Close</th><th class='r'>CLV</th><th class='r'>Final</th><th class='r'>Result</th><th class='r'>Units</th></tr></thead><tbody>" +
+        R.map((x) => "<tr><td class='m'>" + esc(x.date) + "</td><td>" + esc(x.away + " @ " + x.home) + "</td><td class='b'>" + esc(x.pick) + (x.kind === "lean" ? " <span class='tag'>Lean</span>" : "") + "</td><td>" + esc(x.book || "–") +
+          "</td><td class='r'>" + num(x.close_line) + "</td><td class='r'>" + sgn(x.clv_pts) + "</td><td class='r m'>" + esc(x.away_score) + "–" + esc(x.home_score) +
+          "</td><td class='r b " + (x.result === "W" ? "pos" : x.result === "L" ? "neg" : "") + "'>" + esc(x.result) + "</td><td class='r'>" + sgn(x.profit, 2) + "</td></tr>").join("") + "</tbody>";
+    }
+  }
+
+  // Ratings
+  $("t-rat").innerHTML = "<thead><tr><th class='r'>#</th><th>Team</th><th class='r'>Net</th><th class='r'>Offense</th><th class='r'>Defense</th><th class='r'>Pace</th></tr></thead><tbody>" +
+    D.ratings.map((r) => "<tr><td class='r m'>" + r.rank + "</td><td>" + esc(r.team) + "</td><td class='r b'>" + sgn(r.net) + "</td><td class='r'>" + num(r.adj_oe) +
+      "</td><td class='r'>" + num(r.adj_de) + "</td><td class='r'>" + num(r.adj_tempo) + "</td></tr>").join("") + "</tbody>";
+
+  // Update: starts the "Update NBA card" workflow (token for this repo kept only in this browser)
+  const REPO = D.repo, WF = "update.yml", API = "https://api.github.com/repos/" + REPO + "/actions";
+  const RUNS_URL = "https://github.com/" + REPO + "/actions/workflows/" + WF;
+  const store = { get: () => { try { return localStorage.getItem("gh_token_nba") || ""; } catch (e) { return ""; } },
+                  set: (v) => { try { v ? localStorage.setItem("gh_token_nba", v) : localStorage.removeItem("gh_token_nba"); } catch (e) {} } };
+  const gen = new Date(D.generated_at);
+  const ago = (d) => { const m = Math.round((Date.now() - d) / 60000);
+    return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " hr ago" : Math.round(m / 1440) + " days ago"; };
+  const say = (t) => { $("upd-status").innerHTML = t; };
+  say("Updated " + gen.toLocaleString("en-US", {weekday: "short", hour: "numeric", minute: "2-digit"}) + " · " + ago(gen));
+  const askKey = () => { const t = prompt("Paste a GitHub fine-grained token for " + REPO + " with Actions: Read and write.\nIt is saved only in this browser. Leave blank to remove it.", store.get());
+    if (t !== null) store.set(t.trim()); return store.get(); };
+  const gh = (path, opts) => fetch(API + path, Object.assign({ headers: { Accept: "application/vnd.github+json",
+    Authorization: "Bearer " + store.get(), "X-GitHub-Api-Version": "2022-11-28" } }, opts || {}));
+  const followRun = (since) => {
+    const btn = $("upd-btn"); btn.disabled = true; const t0 = Date.now();
+    const tick = async () => {
+      try {
+        const run = (await (await gh("/workflows/" + WF + "/runs?per_page=1")).json()).workflow_runs?.[0];
+        const mins = Math.floor((Date.now() - t0) / 60000);
+        if (!run || new Date(run.created_at) < since) say("Starting…");
+        else if (run.status !== "completed") say("Updating… " + mins + " min · <a href='" + run.html_url + "' target='_blank' rel='noopener'>details</a>");
+        else if (run.conclusion === "success") { say("Done. Reloading…"); setTimeout(() => location.replace(location.pathname + "?t=" + Date.now()), 4000); return; }
+        else { say("Update failed · <a href='" + run.html_url + "' target='_blank' rel='noopener'>details</a>"); btn.disabled = false; return; }
+      } catch (e) { say("Reconnecting…"); }
+      setTimeout(tick, 10000);
+    };
+    tick();
+  };
+  $("upd-btn").onclick = async () => {
+    if (!store.get() && !askKey()) { window.open(RUNS_URL, "_blank", "noopener"); say("No token: use Run workflow on GitHub"); return; }
+    const since = new Date(Date.now() - 5000);
+    say("Starting…");
+    const branch = (await (await fetch("https://api.github.com/repos/" + REPO)).json().catch(() => ({}))).default_branch || "main";
+    const r = await gh("/workflows/" + WF + "/dispatches", { method: "POST", body: JSON.stringify({ ref: branch }) }).catch(() => null);
+    if (r && r.status === 204) followRun(since);
+    else if (r && [401, 403, 404].includes(r.status)) { store.set(""); say("Token refused (" + r.status + "). Click Update to enter a new one."); }
+    else say("Couldn't reach GitHub");
+  };
+  if (store.get()) gh("/workflows/" + WF + "/runs?per_page=1").then((r) => r.json()).then((j) => {
+    const run = j.workflow_runs?.[0]; if (run && run.status !== "completed") followRun(new Date(run.created_at)); }).catch(() => {});
+
+})();
+</script>

@@ -1,0 +1,95 @@
+# Builds the daily NBA card with live SportsGameOdds lines and publishes it to GitHub Pages
+# (barrca12-rgb.github.io/NBA/). Triggered by the Update button on the page, from the Actions tab, by code changes,
+# or on the schedule below. No Odds API: lines come from SGO only (SGO_API_KEY secret).
+name: Update NBA card
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Card date YYYY-MM-DD (blank = today, plus tomorrow when it has lines)"
+        required: false
+        default: ""
+  push:
+    branches: [claude/gifted-turing-3c08ve, main]
+    paths:
+      - "nba/**.py"
+      - "data/model.json"
+      - ".github/workflows/update.yml"
+  schedule:                 # October-June (UTC; ET = UTC-4 until early November, then UTC-5). 8 runs a day:
+                            # morning (last night's results and box scores), midday, before tip, and the evening
+                            # hours when next-day openers post.
+    - cron: "41 12 * 10,11,12,1,2,3,4,5,6 *"
+    - cron: "41 16,19,22 * 10,11,12,1,2,3,4,5,6 *"
+    - cron: "41 0,2,4,5 * 10,11,12,1,2,3,4,5,6 *"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update-nba-card
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      # hoopR and LUMA downloads; past seasons never change, the current one is refreshed by the run
+      - uses: actions/cache@v4
+        with:
+          path: nba/cache
+          key: nba-${{ github.run_id }}
+          restore-keys: nba-
+
+      - name: Build the card with live lines
+        env:
+          SGO_API_KEY: ${{ secrets.SGO_API_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.date }}" ]; then python -W ignore -m nba.run_day --date "${{ github.event.inputs.date }}"
+          else python -W ignore -m nba.run_day --auto; fi
+
+      - name: Build site
+        run: |
+          mkdir -p _site
+          cp reports/nba_*.html reports/days.json _site/ 2>/dev/null || true
+          CUR=$(python -c "import json; print('nba_' + json.load(open('reports/days.json'))['current'] + '.html')" 2>/dev/null || true)
+          if [ -n "$CUR" ] && [ -f "reports/$CUR" ]; then cp "reports/$CUR" _site/index.html
+          else echo '<!doctype html><meta charset="utf-8"><title>NBA card</title><p>No card yet.</p>' > _site/index.html; fi
+          touch _site/.nojekyll
+
+      - name: Save the card, lines and plays to the repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git add -A reports lines bets
+          git diff --cached --quiet || git commit -m "Update NBA card ($(date -u +'%Y-%m-%d %H:%M') UTC)"
+          ok=0
+          for i in 1 2 3 4 5 6; do
+            if git pull --rebase -X theirs origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}"; then ok=1; break; fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 4))
+          done
+          [ "$ok" = 1 ]
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
