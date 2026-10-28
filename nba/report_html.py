@@ -243,7 +243,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   <div class="kpis" id="kpis"></div>
 
   <section class="panel" aria-labelledby="plays-h">
-    <div class="panel-h"><h2 id="plays-h">Plays</h2><span class="note">Totals only: edge 4+ pts vs the best number, price −130 or better, 1 unit each, at most 3 overs and 3 unders a day (largest edges first; the rest show as Capped on the board). Win % = backtest rate at that edge vs openers. A play is logged at the number it first appears.</span></div>
+    <div class="panel-h"><h2 id="plays-h">Plays</h2><span class="note">Totals only: edge 4+ pts vs the best number, price −130 or better, 1 unit each, at most 3 overs and 3 unders a day (largest edges first; the rest show as Capped on the board), and the edge must still be 3+ after removing the league-wide gap between the model and openers (shown in the KPI strip). Win % = backtest rate at that edge vs openers. A play is logged at the number it first appears.</span></div>
     <div class="scroll"><table id="t-plays"></table></div>
   </section>
 
@@ -263,7 +263,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   </section>
 
   <section class="panel" aria-labelledby="watch-h" id="watch-sec">
-    <div class="panel-h"><h2 id="watch-h">Watch list</h2><span class="note">Total becomes a play if the line reaches the number shown.</span></div>
+    <div class="panel-h"><h2 id="watch-h">Watch list</h2><span class="note">Total becomes a play if the line reaches the number shown (edge 4+ and 3+ after the league-wide gap).</span></div>
     <div class="scroll"><table id="t-watch"></table></div>
   </section>
 
@@ -359,7 +359,8 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     ["Totals", rec(T) + "<small>" + (T && T.win != null ? pct(T.win) : "") + "</small>"],
     ["Spread leans", rec(S) + "<small>" + (S && S.win != null ? pct(S.win) : "") + "</small>"],
     ["Units", "<span class='" + (T && T.units > 0 ? "pos" : T && T.units < 0 ? "neg" : "") + "'>" + sgn(T ? T.units : 0, 2) + "</span>"],
-    ["Avg CLV", T && T.clv_pts != null ? sgn(T.clv_pts, 2) + "<small>pts</small>" : "–"]];
+    ["Avg CLV", T && T.clv_pts != null ? sgn(T.clv_pts, 2) + "<small>pts</small>" : "–"],
+    ["League gap", (() => { const g = D.games.find((x) => x.market_gap != null); return g ? sgn(g.market_gap) + "<small>model vs openers</small>" : "–"; })()]];
   $("kpis").innerHTML = kp.map(([k, v]) => "<div class='kpi'><div class='k'>" + k + "</div><div class='v'>" + v + "</div></div>").join("");
 
   // Odds board
@@ -446,7 +447,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   const W = D.games.filter((g) => g.total_verdict === "WATCH");
   if (!W.length) $("watch-sec").hidden = true;
   else $("t-watch").innerHTML = "<thead><tr><th>Time</th><th>Game</th><th>Side</th><th class='r'>Now</th><th class='r'>Play at</th><th class='r'>Edge now</th></tr></thead><tbody>" +
-    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + matchupL(g) + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
+    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + matchupL(g) + (g.total_gap_note ? "<div class='f' style='font-size:12px;white-space:normal'>" + esc(g.total_gap_note) + "</div>" : "") + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
       "</td><td class='r'>" + num(playAt(g.total_good_to, g.total_pick === "Under")) + "</td><td class='r m'>" + sgn(g.total_edge) + "</td></tr>").join("") + "</tbody>";
 
   // Record

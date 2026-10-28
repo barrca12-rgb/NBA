@@ -61,8 +61,10 @@ def main():
         et = lambda d: pd.to_datetime(d["start"], utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
         has_live = len(lines) and (et(lines) == f"{day:%Y-%m-%d}").any()
         use_early = not has_live and len(early) and (et(early) == f"{day:%Y-%m-%d}").any()
+        gap = getattr(live.project, "gap", 0.0)
         games, plays = card.build(proj, early if use_early else lines, opens, op, day,
-                                  live=day >= today and not getattr(a, "stale", False), early=bool(use_early))
+                                  live=day >= today and not getattr(a, "stale", False), early=bool(use_early), gap=gap)
+        print(f"{day:%Y-%m-%d}: market-wide gap (model - opener, last 60 games) {gap:+.2f}", flush=True)
         injuries.annotate(games, names, season_of(day))
         record.log(plays)
         built.append((day, games, rt))

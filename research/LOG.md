@@ -471,3 +471,15 @@ At the opener (phase 5 spec):
 
 Live model refit on this spec (data/model.json, `python -m nba.fit 2027`); rookie LOKI is now backtested (entry 16
 caveat resolved). In-season ARC history still pending (LUMA pull).
+
+## Entry 19 (2026-10-28): betting rule change, totals edge must survive the league-wide gap (Chad)
+
+This season the model sits about 3.9 points under the market on almost every game (close - model +3.85 over 56
+games; backtest seasons +0.6 to +0.9 the other way), so nearly every 4+ edge was an under. New rule: a totals play
+needs edge 4+ vs the best number AND 3+ after removing the league-wide gap = median (model total - opening total)
+over the last 60 completed games (ESPN's free openers, cached in lines/espn_open_<season>.csv; 0 until 20 games).
+Exploratory backtest 2024-2026 at the opener: 59.3% on 968 plays (37% unders) vs 59.4% on 1,120 (34% unders) under
+the old rule; a gap-relative-only rule (no raw edge) was weaker (58.2% at 4+). Gap at switch-over: -3.76.
+
+Applied before tip to Oct 28's logged unders: WSH/CLE and DEN/NO Under 239.5 (edge 5.1, 1.3 after the gap) are
+reclassified "gap_rule" and not counted; PHI/IND Under 239.5 (edge 8.5, 4.7 after the gap) stays.

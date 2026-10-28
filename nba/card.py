@@ -16,6 +16,10 @@ TOTAL_EDGE, TOTAL_WATCH, SPREAD_EDGE, MIN_PRICE = 4.0, 3.0, 3.0, -130
 # one risk (the season's scoring level). Plays already logged that day count first; new ones fill open slots by
 # edge; the rest show as CAPPED and are not logged.
 MAX_PER_SIDE = 3
+# From Oct 28, 2026 (Chad, research/LOG.md entry 19): a totals play also needs REL_EDGE+ after removing the market-wide
+# gap (median model total minus opener over the last 60 games), so a disagreement about the whole league's scoring
+# level cannot by itself make every game a play. Backtest 2024-2026: 59.3% on 968 plays vs 59.4% on 1,120.
+REL_EDGE = 3.0
 # backtest win rate at the opener by edge (phase 4 spec, 2024-2026; 6+ shrunk toward the 4+ rate)
 def total_p(e): return 0.557 if e < 6 else 0.60
 SPREAD_P = 0.545
@@ -38,7 +42,7 @@ def best(lines: pd.DataFrame, col: str, price: str, higher: bool):
 
 
 def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.DataFrame, day: pd.Timestamp,
-          live: bool = True, early: bool = False) -> tuple[list[dict], list[dict]]:
+          live: bool = True, early: bool = False, gap: float = 0.0) -> tuple[list[dict], list[dict]]:
     """early: the day's lines are look-ahead numbers the books have taken down; edges are shown, nothing is logged."""
     live = live and not early
     games, plays = [], []
@@ -80,9 +84,17 @@ def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.Data
             row.update({"total_pick": side.title(), "total_line": b["line"], "total_odds": b["odds"], "total_book": b["book"],
                         "total_link": b["link"], "total_edge": round(e, 2), "total_p": p,
                         "total_ev": p * _payout(b["odds"] if b["odds"] is not None else -110) - (1 - p),
-                        "total_good_to": mt - TOTAL_EDGE if side == "over" else mt + TOTAL_EDGE,
+                        # line a play needs: edge 4+ and 3+ after the league-wide gap
+                        "total_good_to": (mt - max(TOTAL_EDGE, REL_EDGE + gap) if side == "over"
+                                          else mt + max(TOTAL_EDGE, REL_EDGE - gap)),
                         "total_units": 1.0})
-            row["total_verdict"] = "BET" if e >= TOTAL_EDGE and ok_price else "WATCH" if e >= TOTAL_WATCH else None
+            rel = e + gap if side == "under" else e - gap       # edge with the league-wide gap removed
+            row["total_rel_edge"], row["market_gap"] = round(rel, 2), round(gap, 2)
+            row["total_verdict"] = ("BET" if e >= TOTAL_EDGE and rel >= REL_EDGE and ok_price
+                                    else "WATCH" if e >= TOTAL_WATCH else None)
+            if row["total_verdict"] == "WATCH" and e >= TOTAL_EDGE and rel < REL_EDGE:
+                row["total_gap_note"] = (f"Edge {e:.1f} but only {rel:.1f} after the league-wide gap "
+                                         f"(model {gap:+.1f} vs openers lately); needs {REL_EDGE:g}+")
             if e >= 8:
                 row["total_warn"] = ("Edge of 8+ points: rare in the backtest. Check injury news and the lineup; the "
                                      "model only knows who played in each team's last game.")

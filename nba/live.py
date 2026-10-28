@@ -7,6 +7,7 @@ and scoring environment. The market line is never an input.
 from __future__ import annotations
 
 import json
+import os
 
 import numpy as np
 import pandas as pd
@@ -33,6 +34,39 @@ def slate(day: pd.Timestamp, season: int) -> pd.DataFrame:
         "home_name": d["home_display_name"], "away_name": d["away_display_name"],
         "neutral": d["neutral_site"].fillna(False).astype(bool),
         "home_pts": np.nan, "away_pts": np.nan, "periods": np.nan, "pace": np.nan}).reset_index(drop=True)
+
+
+GAP_GAMES, GAP_MIN = 60, 20
+OPENERS = os.path.join(os.path.dirname(__file__), "..", "lines", "espn_open_{}.csv")
+
+
+def espn_openers(game_ids, season: int) -> pd.Series:
+    """ESPN's stored opening total per completed game (free feed; median across real books), cached in
+    lines/espn_open_<season>.csv so each game is fetched once."""
+    from . import lines
+    path = OPENERS.format(season)
+    have = pd.read_csv(path) if os.path.exists(path) else pd.DataFrame(columns=["game_id", "open_total"])
+    todo = [int(g) for g in game_ids if int(g) not in set(have["game_id"].astype(int))]
+    if todo:
+        rows = []
+        for gid in todo:
+            l = pd.DataFrame(lines.game_lines(gid))
+            l = l[~l["book"].fillna("").isin(lines.NOT_BOOKS | {"", "fetch failed"})] if len(l) else l
+            v = l["open_total"].median() if len(l) and "open_total" in l else float("nan")
+            rows.append({"game_id": gid, "open_total": v})
+        have = pd.concat([have, pd.DataFrame(rows)], ignore_index=True)
+        have.to_csv(path, index=False)
+    return have.set_index(have["game_id"].astype(int))["open_total"]
+
+
+def market_gap(done: pd.DataFrame, season: int) -> float:
+    """Median of (model total - opening total) over the league's last GAP_GAMES completed games with an opener
+    (0 until GAP_MIN). The part of every total edge that is a disagreement about the whole league's scoring level,
+    not about the game (Oct 28, 2026 rule, research/LOG.md entry 19)."""
+    done = done.sort_values(["date", "game_id"]).tail(GAP_GAMES * 2)
+    op = espn_openers(done["game_id"], season)
+    d = done.assign(open_total=done["game_id"].map(op)).dropna(subset=["open_total", "final_total"]).tail(GAP_GAMES)
+    return float((d["final_total"] - d["open_total"]).median()) if len(d) >= GAP_MIN else 0.0
 
 
 def upcoming(today: pd.Timestamp, day: pd.Timestamp, season: int) -> pd.DataFrame:
@@ -88,6 +122,7 @@ def project(day, season: int, today=None) -> tuple[pd.DataFrame, pd.DataFrame]:
     cur = b[b["season"] == season].copy()
     if spec.get("bias_k"):
         cur = p3.bias_correct(cur, spec["bias_k"])
+    project.gap = market_gap(cur[cur["home_pts"].notna() & (cur["date"] < day)], season)
     out = sl.merge(cur[["game_id", "final_margin", "final_total", "home_rest", "away_rest", "home_avail_net",
                         "away_avail_net", "home_usual_net", "away_usual_net", "early"]].rename(columns={"early": "early_w"}),
                    on="game_id", how="left")
