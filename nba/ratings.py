@@ -86,4 +86,5 @@ def predict(r: dict, home, away, neutral) -> pd.DataFrame:
     poss = r["p0"] + r["tempo"].reindex(home).to_numpy() + r["tempo"].reindex(away).to_numpy()
     hp = r["b0"] + r["hca"] * v + r["off"].reindex(home).to_numpy() - r["def"].reindex(away).to_numpy()
     ap = r["b0"] - r["hca"] * v + r["off"].reindex(away).to_numpy() - r["def"].reindex(home).to_numpy()
-    return pd.DataFrame({"pred_margin": poss * (hp - ap) / 100, "pred_total": poss * (hp + ap) / 100})
+    return pd.DataFrame({"pred_margin": poss * (hp - ap) / 100, "pred_total": poss * (hp + ap) / 100,
+                         "pred_pace": poss})

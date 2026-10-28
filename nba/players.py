@@ -85,10 +85,16 @@ def _loki_names() -> pd.Series:
     return pd.Series(names)
 
 
+LOKI_PRE = False   # backtests: True = past seasons use their preseason LOKI board (loki_pre_<season>.csv)
+
+
 def loki(season: int) -> pd.DataFrame | None:
     """Latest LUMA LOKI ratings for a season (data/luma/loki_<season>.csv from nba/luma.py), indexed by normalized
-    name with net, O, D; None when there is no file."""
+    name with net, O, D; None when there is no file. With LOKI_PRE, seasons without a weekly file use their
+    preseason board (no look-ahead: released before opening night)."""
     path = os.path.join(LOKI_DIR, f"loki_{season}.csv")
+    if not os.path.exists(path) and LOKI_PRE:
+        path = os.path.join(LOKI_DIR, f"loki_pre_{season}.csv")
     if not os.path.exists(path):
         return None
     lk = pd.read_csv(path)
