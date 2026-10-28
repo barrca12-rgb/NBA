@@ -1,8 +1,12 @@
 {
- "pulled_at": "2026-10-28T01:19:05+00:00",
- "calls": 15,
+ "pulled_at": "2026-10-28T01:24:13+00:00",
+ "calls": 18,
  "source": "LUMA Basketball Research (lumahoops.org), CC BY 4.0",
  "rows": {
-  "loki_2027.csv": 729
+  "arc_live_2027.csv": 32,
+  "loki_2027.csv": 729,
+  "loki_pre_2025.csv": 692,
+  "loki_pre_2026.csv": 687,
+  "loki_pre_2027.csv": 729
  }
 }
