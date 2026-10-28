@@ -48,13 +48,18 @@ def q(tool: str, **args) -> dict:
             "content-type": "application/json", "x-luma-key": os.environ.get("LUMA_KEY", ""),
             "User-Agent": "nba-card (Off The Glass)"})
         try:
+            time.sleep(1.0)                      # pace: one call a second
             with urllib.request.urlopen(req, timeout=60) as r:
                 q.calls = getattr(q, "calls", 0) + 1
                 return json.load(r)
         except urllib.error.HTTPError as e:
             if e.code != 429:
                 raise
-            wait = float(json.loads(e.read() or b"{}").get("retry_after_s", 60))
+            raw = e.read() or b"{}"
+            info = json.loads(raw)
+            hdr = {k: v for k, v in e.headers.items() if "limit" in k.lower() or "retry" in k.lower()}
+            print(f"LUMA 429 after {getattr(q, 'calls', 0)} calls: {raw.decode()[:500]} {hdr}", flush=True)
+            wait = float(info.get("retry_after_s", 60))
             if attempt or wait > 300:
                 raise Budget(f"LUMA rate limit (retry after {wait:.0f}s)")
             time.sleep(wait)
@@ -101,11 +106,13 @@ def main():
         raise SystemExit("LUMA_KEY is not set")
     os.makedirs(OUT, exist_ok=True)
     try:
-        if not os.path.exists(os.path.join(OUT, "players.csv")) or a.current in range(a.start, a.end + 1):
-            pull_players()
-        for s in range(a.end, a.start - 1, -1):          # newest first: the live season matters most
-            for t in ("loki", "arc_live"):
+        # LOKI first (about 14 calls a season), then in-season ARC (about 80 a season); newest seasons first.
+        # Names come from the ARC/LOKI download files, so the players table is pulled last.
+        for t in ("loki", "arc_live"):
+            for s in range(a.end, a.start - 1, -1):
                 pull_table(t, s, refresh=(s == a.current))
+        if not os.path.exists(os.path.join(OUT, "players.csv")):
+            pull_players()
     except Budget as e:
         print(f"stopped: {e}; rerun tomorrow to continue")
     # manifest: what is on disk and when this pull ran (for citing the data a backtest used)
