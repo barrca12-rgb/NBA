@@ -22,7 +22,11 @@ SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/score
 
 
 def load() -> pd.DataFrame:
-    return pd.read_csv(PLAYS, dtype={"bet_id": str}) if os.path.exists(PLAYS) else pd.DataFrame(columns=COLS)
+    # text columns stay text even while every value is empty (pandas would read an all-empty column as float and
+    # refuse the first "W"/"L")
+    text = {c: object for c in ("bet_id", "result", "kind", "side", "pick", "book", "close_line", "home_score", "away_score")}
+    text.update({"close_line": float, "home_score": float, "away_score": float})
+    return pd.read_csv(PLAYS, dtype=text) if os.path.exists(PLAYS) else pd.DataFrame(columns=COLS)
 
 
 def log(new: list[dict]) -> pd.DataFrame:
