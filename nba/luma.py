@@ -108,6 +108,11 @@ def main():
                 pull_table(t, s, refresh=(s == a.current))
     except Budget as e:
         print(f"stopped: {e}; rerun tomorrow to continue")
+    # manifest: what is on disk and when this pull ran (for citing the data a backtest used)
+    files = {f: int(sum(1 for _ in open(os.path.join(OUT, f))) - 1) for f in sorted(os.listdir(OUT)) if f.endswith(".csv")}
+    with open(os.path.join(OUT, "MANIFEST.json"), "w") as f:
+        json.dump({"pulled_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"), "calls": getattr(q, "calls", 0),
+                   "source": "LUMA Basketball Research (lumahoops.org), CC BY 4.0", "rows": files}, f, indent=1)
     print(f"{getattr(q, 'calls', 0)} LUMA calls")
 
 
