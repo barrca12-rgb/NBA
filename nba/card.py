@@ -12,6 +12,10 @@ import pandas as pd
 from . import record
 
 TOTAL_EDGE, TOTAL_WATCH, SPREAD_EDGE, MIN_PRICE = 4.0, 3.0, 3.0, -130
+# At most this many totals plays per side (over / under) per day, from Oct 27, 2026 (Chad): plays on one side share
+# one risk (the season's scoring level). Plays already logged that day count first; new ones fill open slots by
+# edge; the rest show as CAPPED and are not logged.
+MAX_PER_SIDE = 3
 # backtest win rate at the opener by edge (phase 4 spec, 2024-2026; 6+ shrunk toward the 4+ rate)
 def total_p(e): return 0.557 if e < 6 else 0.60
 SPREAD_P = 0.545
@@ -83,7 +87,7 @@ def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.Data
                 row["total_warn"] = ("Edge of 8+ points: rare in the backtest. Check injury news and the lineup; the "
                                      "model only knows who played in each team's last game.")
             if row["total_verdict"] == "BET" and live:
-                plays.append(_play(day, g, ev, "total", "play", side, f"{side.title()} {b['line']:g}", b, mt, e, p, now))
+                row["_play"] = _play(day, g, ev, "total", "play", side, f"{side.title()} {b['line']:g}", b, mt, e, p, now)
         # spreads (leans only)
         bh, ba = best(L, "home_spread", "home_spread_odds", higher=True), None
         if len(L) and L["home_spread"].notna().any():
@@ -104,7 +108,29 @@ def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.Data
                     plays.append(_play(day, g, ev, "spread", "lean", side, f"{team} {b['line']:+g}", b, mm if side == "home" else -mm,
                                        e, SPREAD_P, now))
         games.append(row)
+    _cap(games, plays, day)
     return games, plays
+
+
+def _cap(games: list[dict], plays: list[dict], day) -> None:
+    """Apply MAX_PER_SIDE to the day's totals BETs (see above). Logged plays keep their slot."""
+    logged = record.load()
+    logged = logged[(logged["date"] == f"{day:%Y-%m-%d}") & (logged["market"] == "total") & (logged["kind"] == "play")]
+    for side in ("Over", "Under"):
+        bets = [g for g in games if g.get("total_verdict") == "BET" and g.get("total_pick") == side]
+        ids = set(logged.loc[logged["side"] == side.lower(), "game_id"].astype(int))
+        keep = [g for g in bets if int(g["game_id"]) in ids]
+        slots = max(0, MAX_PER_SIDE - len(ids))
+        new = sorted((g for g in bets if int(g["game_id"]) not in ids), key=lambda g: -g["total_edge"])
+        keep += new[:slots]
+        for g in new[slots:]:
+            g["total_verdict"] = "CAPPED"
+            g["total_capped"] = f"Over the {MAX_PER_SIDE}-per-side daily cap ({side.lower()}s); not logged"
+        for g in keep:
+            if g.get("_play"):
+                plays.append(g["_play"])
+    for g in games:
+        g.pop("_play", None)
 
 
 def _play(day, g, ev, market, kind, side, pick, b, model, edge, p, now) -> dict:

@@ -243,7 +243,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   <div class="kpis" id="kpis"></div>
 
   <section class="panel" aria-labelledby="plays-h">
-    <div class="panel-h"><h2 id="plays-h">Plays</h2><span class="note">Totals only: edge 4+ pts vs the best number, price −130 or better, 1 unit each. Win % = backtest rate at that edge vs openers. A play is logged at the number it first appears.</span></div>
+    <div class="panel-h"><h2 id="plays-h">Plays</h2><span class="note">Totals only: edge 4+ pts vs the best number, price −130 or better, 1 unit each, at most 3 overs and 3 unders a day (largest edges first; the rest show as Capped on the board). Win % = backtest rate at that edge vs openers. A play is logged at the number it first appears.</span></div>
     <div class="scroll"><table id="t-plays"></table></div>
   </section>
 
@@ -404,10 +404,11 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
         } else if (market === "total") {
           const ou = i === 0 ? "over" : "under";
           model = i === 0 ? num(g.model_total) : "";
-          const pick = (g.total_pick || "").toLowerCase() === ou && ["BET", "WATCH"].includes(g.total_verdict);
+          const pick = (g.total_pick || "").toLowerCase() === ou && ["BET", "WATCH", "CAPPED"].includes(g.total_verdict);
           bookCells = BOOKS.map((bk) => { const x = bl(g, bk); if (!x || x.total == null) return cell(null);
             return cell((i === 0 ? "o" : "u") + num(x.total), x[ou + "_odds"], x[ou + "_link"], pick && g.total_book === bk && x.total === g.total_line); });
           if (pick && g.total_verdict === "BET") edge = g.early ? "<span class='tag'>Early " + sgn(g.total_edge) + "</span>" : "<span class='tag bet'>BET " + sgn(g.total_edge) + "</span>";
+          else if (pick && g.total_verdict === "CAPPED") edge = "<span class='tag'>Capped " + sgn(g.total_edge) + "</span>";
           else if (pick) edge = "<span class='tag'>Watch · bet at " + ou[0] + num(playAt(g.total_good_to, ou === "under")) + "</span>";
         } else {
           const p = sd === "home" ? g.p_home_win : 1 - g.p_home_win;

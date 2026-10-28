@@ -396,3 +396,12 @@ Injury news (ESPN injury feed, Oct 27 evening) vs the model's assumption (player
   Line has moved 239.5 -> 237.5 toward the play.
 * WSH/CLE: Champagnie out (4 minutes last game), Dybantsa questionable (has not played). CLE: none. No effect.
 * DEN/NO: Cameron Johnson doubtful, S. Jones and Diallo out, all absent last game; Poole probable. No effect.
+
+## Entry 15 (2026-10-28): betting rule change, at most 3 totals plays per side per day (Chad)
+
+Every totals play so far has been an under: the model sits below the market on 19 of 24 lined games (about 2-5
+points on average per slate), so plays on one side share one risk, this season's scoring level. From now on the
+card logs at most 3 overs and 3 unders a day. Plays already logged that day keep their slot; new ones fill open
+slots in order of edge; the rest show as "Capped" and are not logged. Projections and the 4-point threshold are
+unchanged. Applied once retroactively before tip: NY/CHI Under 234.5 (Oct 28, edge 4.6, the smallest of four
+unders logged that day) is reclassified "capped" in bets/plays.csv and is not counted in the record.
