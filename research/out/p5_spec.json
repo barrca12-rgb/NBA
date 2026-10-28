@@ -1,0 +1,59 @@
+{
+ "cfg": {
+  "half_life": 30.0,
+  "prior_games": 10.0,
+  "pace_prior_games": 10.0,
+  "carry": 0.5,
+  "hca_prior": 1.5,
+  "pace_half_life": 15.0,
+  "ppp_col": "ppp_luck"
+ },
+ "margin": [
+  "pred_margin",
+  "pred_margin_x_early",
+  "venue",
+  "home_b2b",
+  "away_b2b",
+  "rest_diff",
+  "avail_diff",
+  "avail_diff_x_early",
+  "miss_diff",
+  "fatigue_3in4_diff",
+  "g7_diff",
+  "tz_diff",
+  "altitude",
+  "playoff",
+  "late",
+  "team_hca"
+ ],
+ "total": [
+  "pred_total",
+  "pred_total_x_early",
+  "season_avg_total",
+  "b2b_sum",
+  "rest_sum",
+  "avail_O_sum",
+  "avail_D_sum",
+  "miss_O_sum",
+  "miss_D_sum",
+  "fatigue_3in4_sum",
+  "g7_sum",
+  "tz_sum",
+  "altitude",
+  "playoff",
+  "late",
+  "recent_dev"
+ ],
+ "walk_forward": {
+  "margin_half_life": 3.0
+ },
+ "adopted": [
+  "P6 late season and playoffs",
+  "P7 recent scoring environment"
+ ],
+ "bias_k": 0.5,
+ "loki_pre": true,
+ "adopted_phase5": [
+  "R1 preseason LOKI for unrated players"
+ ]
+}

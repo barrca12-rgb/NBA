@@ -1,4 +1,4 @@
-"""Freeze the live model: the phase 4 spec (research/out/p4_spec.json) with stage 2 fit on every season
+"""Freeze the live model: the phase 5 spec (research/out/p5_spec.json) with stage 2 fit on every season
 2014-2026, plus each team's home-court edge for the next season. Writes data/model.json for nba/live.py.
 
     python -m nba.fit 2027      # re-run after each season with the new season number
@@ -16,15 +16,15 @@ from . import model, ratings
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 SAVED = os.path.join(ROOT, "data", "model.json")
-SPEC = os.path.join(ROOT, "research", "out", "p4_spec.json")
+SPEC = os.path.join(ROOT, "research", "out", "p5_spec.json")
 
 
 def main(next_season: int):
-    from research import p4
+    from research import p4, p5
     with open(SPEC) as f:
         spec = json.load(f)
     cfg = ratings.RatingConfig(**spec["cfg"])
-    b = p4.build(cfg, (None, repr(cfg)), None, spec)
+    b = p5.frame(cfg, spec.get("loki_pre", False))
     b = b[(b["season"] >= 2014) & (b["season"] < next_season)].dropna(subset=["margin"])
     mf, tf, wf = spec["margin"], spec["total"], spec["walk_forward"]
     yrs = (next_season - 1 - b["season"].to_numpy(float))

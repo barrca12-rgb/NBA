@@ -441,3 +441,33 @@ changes (stage-1 settings, player ratings).
 3. **Joint re-tune of the stage-1 settings** with the full model, one setting at a time around the current values
    (two passes at most): half_life {20, 30, 45, 60}, prior_games {5, 10, 15, 20}, carry {0.3, 0.5, 0.7},
    pace_half_life {8, 15, 30}.
+
+## Entry 18 (2026-10-28): phase 5 results (`research/out/p5_select.md`, `p5_final.md`)
+
+Selection on accuracy, 2015-2025 (14,149 games). Base (phase 4 spec): margin 10.2618, total 14.3750.
+
+| candidate | margin MAE | total MAE | adopted |
+|---|---:|---:|---|
+| T1 early-season level (totals) | 10.2618 | 14.3760 | no |
+| T2 possessions x early, efficiency x early | 10.2618 | 14.3770 | no |
+| stage-1 settings, 11 alternatives one at a time (half-life 20/45/60, prior 5/15/20, carry 0.3/0.7, pace half-life 8/30) | 10.2614-10.2708 | 14.3764-14.3934 | none (no pair better; current 30 / 10 / 0.5 / 15 stays) |
+| R1 preseason LOKI for unrated players, scored on 2022-2025 (5,283 games) | 10.7035 (base 10.7380) | 14.4069 (base 14.4030) | **yes** |
+
+* The early-season pace/efficiency pattern is already handled: the existing early-season input and the 15-day
+  pace window absorb it; separate inputs add nothing.
+* The stage-1 settings were already at the optimum with the full model.
+* Rookie LOKI is the biggest margin gain since player ratings were added (0.035 points); totals flat.
+
+Final spec = phase 4 + preseason LOKI (training seasons 2022-2026; live season uses the weekly LOKI). Check season
+2026, scored once: margin MAE 11.343 -> 11.304, total 14.672 -> 14.675.
+
+At the opener (phase 5 spec):
+
+| | 2024 | 2025 | **2026 (check)** | all three |
+|---|---:|---:|---:|---:|
+| Spreads 3+ | 53.3% (315) | 57.7% (421) | **54.4% (366)** | 55.4% (1,102), 52.2-58.4%, CLV +0.83 |
+| Totals 4+ | 57.1% (359) | 62.0% (421) | **58.5% (340)** | 59.4% (1,120), 56.4-62.4%, CLV +3.08 |
+| Phase 4, all three | | | | spreads 54.9% (1,115); totals 58.8% (1,130) |
+
+Live model refit on this spec (data/model.json, `python -m nba.fit 2027`); rookie LOKI is now backtested (entry 16
+caveat resolved). In-season ARC history still pending (LUMA pull).
