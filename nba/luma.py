@@ -45,6 +45,14 @@ def jobs(current: int, start: int) -> list[tuple[str, str, str]]:
         w += f" AND \"asof\" > '{last}'"
     out.append((f"arc_live_{current}.csv", f"SELECT count(*) AS n FROM arc_live WHERE {w}",
                 f'SELECT {ARC_COLS} FROM arc_live WHERE {w} ORDER BY "asof", pid LIMIT {{lim}} OFFSET {{off}}'))
+    # this season's latest weekly LOKI (players.loki: rookies and other unrated players on the live card)
+    w = f"season = {current}"
+    have = os.path.join(OUT, f"loki_{current}.csv")
+    if os.path.exists(have):
+        w += f" AND \"asof\" > '{pd.read_csv(have)['asof'].max()}'"
+    out.append((f"loki_{current}.csv", f"SELECT count(*) AS n FROM loki WHERE {w}",
+                f'SELECT season, "asof" AS asof, release, pid, team, net, "O" AS o, "D" AS d FROM loki WHERE {w} '
+                f'ORDER BY "asof", pid LIMIT {{lim}} OFFSET {{off}}'))
     for s in range(current, start - 1, -1):          # preseason LOKI board, every season (rookies, returners)
         w = (f'season = {s} AND release = (SELECT min(release) FROM loki WHERE season = {s})')
         out.append((f"loki_pre_{s}.csv", f"SELECT count(*) AS n FROM loki WHERE {w}",
@@ -136,7 +144,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     try:
         for name, c, pg in jobs(a.current, a.start):
-            pull_job(name, c, pg, refresh=name == f"arc_live_{a.current}.csv")
+            pull_job(name, c, pg, refresh=name in (f"arc_live_{a.current}.csv", f"loki_{a.current}.csv"))
     except Budget as e:
         print(f"stopped: {e}; rerun tomorrow to continue")
     # manifest: what is on disk and when this pull ran (for citing the data a backtest used)

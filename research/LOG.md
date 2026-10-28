@@ -405,3 +405,17 @@ card logs at most 3 overs and 3 unders a day. Plays already logged that day keep
 slots in order of edge; the rest show as "Capped" and are not logged. Projections and the 4-point threshold are
 unchanged. Applied once retroactively before tip: NY/CHI Under 234.5 (Oct 28, edge 4.6, the smallest of four
 unders logged that day) is reclassified "capped" in bets/plays.csv and is not counted in the record.
+
+## Entry 16 (2026-10-28): live change, LOKI ratings for unrated players (Chad)
+
+Players with no prior-season ARC rating (rookies, returners; 6.8% of 2026-27 minutes so far) used a flat -2.0 per
+100 (O -1, D -1). From now on, on the live card only, they take LUMA's LOKI rating: the latest weekly LOKI from the
+API (data/luma/loki_2027.csv, net/O/D by player id; names from LUMA's free 2026-27 board, SHA-256 checked), and for
+this year's draft picks (no id on LUMA's board) the board's LOKI by name, split evenly between O and D. Matches
+91% of the unrated minutes; the rest (5 players) keep -2.0. Veterans keep their ARC, and backtest seasons have no
+LOKI file, so the backtest and the frozen stage-2 weights are unchanged.
+
+**Untested:** the stage-2 weights were fit with the flat -2.0, and LOKI history is not yet pulled, so this change
+has no backtest. Effect on the current cards (26 games): totals -0.1 points on average (no totals play changed);
+margins move 0.55 points on average, up to 1.8 (WSH/CLE: Dybantsa, first pick, now about -4 instead of -2).
+Two spread leans on Oct 27 dropped. To be backtested once the preseason LOKI history is in (nba/luma.py).

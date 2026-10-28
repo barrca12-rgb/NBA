@@ -60,6 +60,49 @@ def arc() -> pd.DataFrame:
     return a.sort_values("poss").drop_duplicates(["season", "key"], keep="last")[["season", "key"] + COLS]
 
 
+LOKI_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "luma")
+LOKI_BOARD_URL = "https://lumahoops.org/luma/data/releases/loki/2026-27/R1/v3.3/board.csv"
+LOKI_BOARD_SHA256 = "9659c162c2af225a3096aac0b8d8ce8a43e8d6d165a45a05108df9dab9058da8"   # LUMA MANIFEST.txt
+LOKI_BOARD = os.path.join(data.CACHE, "loki_board_2027_v3.3.csv")
+
+
+def _loki_names() -> pd.Series:
+    """pid -> normalized name, from LUMA's free 2026-27 LOKI board (names are not in the API pull)."""
+    if not os.path.exists(LOKI_BOARD):
+        os.makedirs(data.CACHE, exist_ok=True)
+        req = urllib.request.Request(LOKI_BOARD_URL, headers={"User-Agent": "Mozilla/5.0 (nba-card; LUMA open data)"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            body = r.read()
+        if hashlib.sha256(body).hexdigest() != LOKI_BOARD_SHA256:
+            raise RuntimeError("LUMA LOKI board does not match the release hash")
+        with open(LOKI_BOARD, "wb") as f:
+            f.write(body)
+    bd = pd.read_csv(LOKI_BOARD).dropna(subset=["pid"])
+    names = dict(zip(bd["pid"].astype(int), bd["name"].map(norm)))
+    a = pd.read_csv(ARC_FILE, usecols=["pid", "name"]).drop_duplicates("pid") if os.path.exists(ARC_FILE) else None
+    if a is not None:
+        names = {**dict(zip(a["pid"].astype(int), a["name"].map(norm))), **names}
+    return pd.Series(names)
+
+
+def loki(season: int) -> pd.DataFrame | None:
+    """Latest LUMA LOKI ratings for a season (data/luma/loki_<season>.csv from nba/luma.py), indexed by normalized
+    name with net, O, D; None when there is no file."""
+    path = os.path.join(LOKI_DIR, f"loki_{season}.csv")
+    if not os.path.exists(path):
+        return None
+    lk = pd.read_csv(path)
+    lk = lk[lk["asof"] == lk["asof"].max()]
+    lk["key"] = lk["pid"].astype(int).map(_loki_names())
+    lk = lk.dropna(subset=["key"]).drop_duplicates("key").set_index("key")
+    lk = lk.rename(columns={"o": "O", "d": "D"})[["net", "O", "D"]]
+    # this year's draft picks have no pid on LUMA's board: their board rating by name, split evenly O/D
+    bd = pd.read_csv(LOKI_BOARD)
+    bd = bd[bd["pid"].isna()].assign(key=lambda d: d["name"].map(norm)).drop_duplicates("key").set_index("key")
+    rk = pd.DataFrame({"net": bd["loki"], "O": bd["loki"] / 2, "D": bd["loki"] / 2})
+    return pd.concat([lk, rk[~rk.index.isin(lk.index)]])
+
+
 def box(seasons, refresh=()) -> pd.DataFrame:
     parts = []
     for s in seasons:
@@ -91,6 +134,15 @@ def strength(seasons, games: pd.DataFrame, slate: pd.DataFrame | None = None, re
     for c in COLS:
         b[c] = b[c].fillna(pd.Series(b2[c].to_numpy(), index=b.index))
     b["rated"] = b["net"].notna()
+    # Live seasons only (from Oct 28, 2026): players with no ARC rating (rookies, returners) take LUMA's LOKI
+    # rating instead of the flat ROOKIE_ARC. Seasons without a LOKI file (every backtest season) are unchanged.
+    for s, lk in ((s, loki(s)) for s in sorted(b["season"].unique())):
+        if lk is None:
+            continue
+        m = (b["season"] == s) & b["net"].isna()
+        for c in ("net", "O", "D"):
+            b.loc[m, c] = b.loc[m, "key"].map(lk[c])
+        b.loc[m & b["net"].notna(), "rated"] = True
     for c in COLS:
         b[c] = b[c].fillna(ROOKIE_ARC.get(c, 0.0))
     # expected minutes: average over each player's last 10 appearances before this game (any team)
