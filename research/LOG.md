@@ -419,3 +419,25 @@ LOKI file, so the backtest and the frozen stage-2 weights are unchanged.
 has no backtest. Effect on the current cards (26 games): totals -0.1 points on average (no totals play changed);
 margins move 0.55 points on average, up to 1.8 (WSH/CLE: Dybantsa, first pick, now about -4 instead of -2).
 Two spread leans on Oct 27 dropped. To be backtested once the preseason LOKI history is in (nba/luma.py).
+
+---
+
+## Entry 17 (2026-10-28): phase 5 plan (Chad: items 1-3), written before any phase-5 run
+
+**Selection window widened.** Candidates are now chosen on accuracy against final scores (no lines needed) over
+**2015-2025** (2014-15 to 2024-25, about 12,000 games, every season predicted from earlier seasons only), instead of
+2024-25 alone. 2025-26 stays the check season, scored once on the final spec. Betting scorecards (win %, ROI, CLV
+at the opener) are reported on 2024-2026 as before. Base = the phase 4 spec (`research/out/p4_spec.json`).
+Adoption: margin MAE for margin-only changes, total MAE for total-only changes, margin + total MAE for shared
+changes (stage-1 settings, player ratings).
+
+1. **Early-season pace and efficiency (totals).** Every season since 2017-18, the first ~56 games run about 5
+   possessions faster and 3 points per 100 less efficient than the rest, offsetting. Candidates, in order:
+   T1 plain early-season level (`early`) in the total model; T2 predicted possessions x early and predicted
+   efficiency x early as separate inputs.
+2. **Rookie LOKI.** R1: players with no prior-season ARC take LUMA's preseason LOKI (data/luma/loki_pre_<season>,
+   available 2022-2027) instead of the flat -2.0. Scored on 2022-2025 (the seasons it can affect). In-season ARC
+   history is not pulled yet (LUMA's 2,500 rows/day limit): deferred.
+3. **Joint re-tune of the stage-1 settings** with the full model, one setting at a time around the current values
+   (two passes at most): half_life {20, 30, 45, 60}, prior_games {5, 10, 15, 20}, carry {0.3, 0.5, 0.7},
+   pace_half_life {8, 15, 30}.
