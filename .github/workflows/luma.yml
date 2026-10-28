@@ -1,6 +1,6 @@
 # Pulls LUMA Basketball Research snapshots (in-season ARC, LOKI releases, players) into data/luma/ with the LUMA_KEY
-# secret. Weekly on Monday mornings (LUMA updates weekly) and from the Actions tab. Resumable: a first full history
-# pull may need two runs if it reaches the daily query limit.
+# secret. Daily just after LUMA's row budget resets (00:00 UTC) and from the Actions tab. Resumable: the history
+# fills in over several days at 2,500 rows a day (free key).
 name: Pull LUMA data
 
 on:
@@ -15,7 +15,7 @@ on:
       - "nba/luma.py"
       - ".github/workflows/luma.yml"
   schedule:
-    - cron: "23 13 * * 1"
+    - cron: "11 0 * * *"      # daily, just after LUMA's 00:00 UTC reset
 
 permissions:
   contents: write
