@@ -9,6 +9,11 @@ on:
       start:
         description: "First season (year it ends)"
         default: "2014"
+  push:                     # also when the pull code changes
+    branches: [claude/gifted-turing-3c08ve]
+    paths:
+      - "nba/luma.py"
+      - ".github/workflows/luma.yml"
   schedule:
     - cron: "23 13 * * 1"
 
