@@ -482,4 +482,4 @@ Exploratory backtest 2024-2026 at the opener: 59.3% on 968 plays (37% unders) vs
 the old rule; a gap-relative-only rule (no raw edge) was weaker (58.2% at 4+). Gap at switch-over: -3.76.
 
 Applied before tip to Oct 28's logged unders: WSH/CLE and DEN/NO Under 239.5 (edge 5.1, 1.3 after the gap) are
-reclassified "gap_rule" and not counted; PHI/IND Under 239.5 (edge 8.5, 4.7 after the gap) stays.
+reclassified "gap_rule" and not counted; PHI/IND Under 239.5 stays (logged at 239.5; at the current 237.5 the edge is 6.8, 3.05 after the gap).
