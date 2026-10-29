@@ -98,6 +98,27 @@ def grade(closing: pd.DataFrame) -> pd.DataFrame:
     return p
 
 
+PLACED = os.path.join(ROOT, "bets", "placed.csv")
+
+
+def grade_placed() -> None:
+    """bets/placed.csv: bets actually placed (line taken may differ from the logged number); graded at that line."""
+    if not os.path.exists(PLACED):
+        return
+    p = pd.read_csv(PLACED, dtype={"result": object, "odds": object, "book": object})
+    for i in p.index[p["result"].isna()]:
+        date, gid, market, side = str(p.loc[i, "bet_id"]).split("|")
+        g = finals(date).get(int(gid))
+        if not g:
+            continue
+        hs, as_ = g
+        x = (hs + as_ - p.loc[i, "line"]) * (1 if side == "over" else -1) if market == "total" else \
+            ((hs - as_) if side == "home" else (as_ - hs)) + p.loc[i, "line"]
+        p.loc[i, ["home_score", "away_score"]] = [hs, as_]
+        p.loc[i, "result"] = "W" if x > 0 else "L" if x < 0 else "P"
+    p.to_csv(PLACED, index=False)
+
+
 def status(p: pd.DataFrame) -> dict:
     out = {}
     for name, sel in (("totals", (p["market"] == "total") & (p["kind"] == "play")),

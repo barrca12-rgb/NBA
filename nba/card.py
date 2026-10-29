@@ -120,8 +120,28 @@ def build(proj: pd.DataFrame, lines: pd.DataFrame, opens: dict, openers: pd.Data
                     plays.append(_play(day, g, ev, "spread", "lean", side, f"{team} {b['line']:+g}", b, mm if side == "home" else -mm,
                                        e, SPREAD_P, now))
         games.append(row)
+    _logged(games, day)
     _cap(games, plays, day)
     return games, plays
+
+
+def _logged(games: list[dict], day) -> None:
+    """A totals play logged earlier stays on the card at the number it was logged at, with where the line is now
+    (as on the CBB card), even if the current number no longer qualifies."""
+    lg = record.load()
+    lg = lg[(lg["date"] == f"{day:%Y-%m-%d}") & (lg["market"] == "total") & (lg["kind"] == "play")]
+    for g in games:
+        r = lg[lg["game_id"].astype(int) == int(g["game_id"])]
+        if not len(r):
+            continue
+        r = r.iloc[0]
+        g["total_logged"] = {"pick": r["pick"], "line": float(r["line"]), "odds": None if pd.isna(r["odds"]) else float(r["odds"]),
+                             "book": r["book"], "edge": float(r["edge"]), "logged_at": str(r["logged_at"])[:16]}
+        still = g.get("total_verdict") == "BET" and str(g.get("total_pick", "")).lower() == r["side"]
+        now = g.get("total_line")
+        g["total_logged_status"] = (f"Logged {str(r['logged_at'])[5:16].replace('T', ' ')} UTC at {r['pick']} ({r['book']}). "
+                                    + (f"Still a play now at {now:g}." if still else
+                                       f"Line now {now:g}: not a play at this number. Your bet stands." if now is not None else ""))
 
 
 def _cap(games: list[dict], plays: list[dict], day) -> None:

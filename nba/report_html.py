@@ -319,9 +319,12 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   fetch("days.json", {cache: "no-store"}).then((r) => r.json()).then((j) => navDays(j.days)).catch(() => {});
 
   // Plays (totals) and leans (spreads)
-  const P = D.games.filter((g) => g.total_verdict === "BET").map((g) => ({g, bet: g.total_pick + " " + num(g.total_line), price: g.total_odds, book: g.total_book,
+  // logged plays stay listed at their logged number (status line says where the line is now); then today's new plays
+  const P = D.games.filter((g) => g.total_logged).map((g) => ({g, bet: g.total_logged.pick, price: g.total_logged.odds, book: g.total_logged.book,
+    link: null, edge: g.total_logged.edge, p: null, ev: null, model: num(g.model_total), to: "–", open: g.open_total == null ? null : num(g.open_total), units: 1,
+    status: g.total_logged_status})).concat(D.games.filter((g) => g.total_verdict === "BET" && !g.total_logged).map((g) => ({g, bet: g.total_pick + " " + num(g.total_line), price: g.total_odds, book: g.total_book,
     link: g.total_link, edge: g.total_edge, p: g.total_p, ev: g.total_ev, model: num(g.model_total), to: num(playAt(g.total_good_to, g.total_pick === "Under")),
-    open: g.open_total == null ? null : num(g.open_total), units: g.total_units}));
+    open: g.open_total == null ? null : num(g.open_total), units: g.total_units})));
   P.sort((a, b) => String(a.g.start).localeCompare(String(b.g.start)) || b.edge - a.edge);
   // other books' totals for the play's side, best first (same "Also:" line as the CBB card)
   const also = (g) => { const ou = String(g.total_pick || "").toLowerCase(); const pay = (o) => o == null ? -1 : (o > 0 ? o / 100 : 100 / -o);
@@ -335,6 +338,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
     P.map((p) => "<tr><td><div class='b pick'>" + esc(p.bet) + (p.g.early ? " <span class='tag'>Early line</span>" : "") + "</div><div class='f' style='font-size:12px'>" + matchupL(p.g) + " · " + esc(tip(p.g)) + " · Total · " + esc(rest(p.g)) + "</div>" +
       (also(p.g) ? "<div class='f' style='font-size:12px'>" + esc(also(p.g)) + "</div>" : "") +
       (missing(p.g) ? "<div class='inj'>" + esc(missing(p.g)) + "</div>" : "") +
+      (p.status ? "<div class='f' style='font-size:12px;white-space:normal'>" + esc(p.status) + "</div>" : "") +
       (p.g.total_warn ? "<div class='inj'>&#9888; " + esc(p.g.total_warn) + "</div>" : "") +
       (p.g.news ? "<div class='inj'>&#9888; " + esc(p.g.news) + "</div>" : "") + "</td><td>" +
       esc(p.book || "–") + (p.price != null ? " <span class='m'>" + esc(odds(p.price)) + "</span>" : "") + "</td><td class='r m hide-sm hide-md'>" + esc(p.model) + "</td><td class='r pos b'>" + sgn(p.edge) +

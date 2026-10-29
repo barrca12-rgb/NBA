@@ -71,6 +71,7 @@ def main():
         print(f"{day:%Y-%m-%d}: {len(games)} games, {sum(g['total_verdict'] == 'BET' for g in games)} plays, "
               f"{sum(g['spread_verdict'] == 'LEAN' for g in games)} leans", flush=True)
     rec = record.status(record.grade(cl))
+    record.grade_placed()
     os.makedirs(REPORTS, exist_ok=True)
     for day, games, rt in built:
         page = report_html.build(games, rt, names, day, season_of(day), rec, usage)
