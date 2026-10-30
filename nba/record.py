@@ -32,7 +32,11 @@ def load() -> pd.DataFrame:
 def log(new: list[dict]) -> pd.DataFrame:
     """Add plays not logged before (same bet_id keeps its first number)."""
     p = load()
-    add = [r for r in new if r["bet_id"] not in set(p["bet_id"])]
+    # one entry per game and market: a later run never logs the other side of a game already logged (the line or
+    # the injury news can flip the model's side after a play or lean is in)
+    taken = set(p["date"].astype(str) + "|" + p["game_id"].astype(str) + "|" + p["market"].astype(str))
+    add = [r for r in new if r["bet_id"] not in set(p["bet_id"])
+           and f"{r['date']}|{r['game_id']}|{r['market']}" not in taken]
     if add:
         p = pd.concat([p, pd.DataFrame(add).reindex(columns=COLS)], ignore_index=True)
         os.makedirs(os.path.dirname(PLAYS), exist_ok=True)
