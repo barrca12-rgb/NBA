@@ -136,7 +136,32 @@ def fetch(schedule: pd.DataFrame) -> pd.DataFrame:
         early += [r for bk, r in off_board.items() if bk not in per_book]
     fetch.opens, fetch.events = opens, len(events)
     fetch.early = pd.DataFrame(early).reindex(columns=COLS)
-    return pd.DataFrame(rows).reindex(columns=COLS)
+    return drop_alternates(pd.DataFrame(rows).reindex(columns=COLS))
+
+
+ALT_GAP = 1.5   # a book's number this far from the other books' median is an alternate line (or stale): not shown
+
+
+def drop_alternates(l: pd.DataFrame) -> pd.DataFrame:
+    """SGO sometimes reports a book's alternate spread or total (e.g. WSH +1.5 -130 while every book's main line is
+    WSH -1.5). Blank a book's number, price and link for that market when it sits ALT_GAP+ points from the median of
+    the other books on the same game (needs 3+ books)."""
+    l = l.copy()
+    cols = {"home_spread": ["home_spread", "home_spread_odds", "away_spread_odds", "home_spread_link", "away_spread_link"],
+            "total": ["total", "over_odds", "under_odds", "over_link", "under_link"]}
+    dropped = 0
+    for key, group in cols.items():
+        for ev, g in l.groupby("sgo_event"):
+            v = g[key].dropna()
+            if len(v) < 3:
+                continue
+            for i in v.index:
+                others = v.drop(i)
+                if abs(v[i] - others.median()) >= ALT_GAP:
+                    l.loc[i, group] = None
+                    dropped += 1
+    drop_alternates.dropped = dropped
+    return l
 
 
 def track(cur: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
