@@ -66,6 +66,7 @@ def main():
                                   live=day >= today and not getattr(a, "stale", False), early=bool(use_early), gap=gap)
         print(f"{day:%Y-%m-%d}: market-wide gap (model - opener, last 60 games) {gap:+.2f}", flush=True)
         injuries.annotate(games, names, season_of(day))
+        plays = card.injury_hold(games, plays, gap)
         record.log(plays)
         built.append((day, games, rt))
         print(f"{day:%Y-%m-%d}: {len(games)} games, {sum(g['total_verdict'] == 'BET' for g in games)} plays, "

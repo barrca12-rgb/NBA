@@ -170,3 +170,39 @@ def _play(day, g, ev, market, kind, side, pick, b, model, edge, p, now) -> dict:
             "sgo_event": ev, "start": str(g["start"]), "home": g["home"], "away": g["away"], "market": market, "kind": kind,
             "side": side, "pick": pick, "line": b["line"], "odds": b["odds"], "book": b["book"], "model": round(float(model), 2),
             "edge": round(float(edge), 2), "win_p": p, "logged_at": now}
+
+
+HOLD_STATUSES = {"Out"}
+
+
+def injury_hold(games: list[dict], plays: list[dict], gap: float = 0.0) -> list[dict]:
+    """From Oct 30, 2026 (Chad, research/LOG.md entry 20): when ESPN lists a player Out who played in his team's
+    last game (the projection still counts him), re-check the edge with the model's own estimate of his absence
+    (injuries.py: d_total, d_home_margin). A play or lean that no longer qualifies is HELD: shown with the reason,
+    not logged. Never creates a play. Returns the plays that still stand."""
+    held = set()
+    for g in games:
+        outs = [a for a in g.get("injury_alerts") or [] if a["status"] in HOLD_STATUSES]
+        if not outs:
+            continue
+        dt = sum(a["d_total"] for a in outs)
+        dm = sum(a["d_home_margin"] for a in outs)
+        names = ", ".join(f"{a['player']} ({a['team']})" for a in outs)
+        if g.get("total_verdict") == "BET":
+            adj = g["model_total"] + dt
+            e = (g["total_line"] - adj) if g["total_pick"] == "Under" else (adj - g["total_line"])
+            rel = e + gap if g["total_pick"] == "Under" else e - gap
+            if e < TOTAL_EDGE or rel < REL_EDGE:
+                g["total_verdict"] = "HELD"
+                g["total_hold"] = (f"Held: {names} out. With his absence the model is {adj:.1f}, edge {e:+.1f} "
+                                   f"({rel:+.1f} after the league-wide gap). Not logged.")
+                held.add((g["game_id"], "total"))
+        if g.get("spread_verdict") == "LEAN" and g.get("spread_side"):
+            mm = g["model_margin"] + dm
+            line = g["spread_line"]
+            e = (mm + line) if g["spread_side"] == "home" else (-mm + line)
+            if e < SPREAD_EDGE:
+                g["spread_verdict"] = "HELD"
+                g["spread_hold"] = f"Held: {names} out. Adjusted edge {e:+.1f}. Not logged."
+                held.add((g["game_id"], "spread"))
+    return [p for p in plays if (p["game_id"], p["market"]) not in held]

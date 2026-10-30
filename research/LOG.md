@@ -483,3 +483,20 @@ the old rule; a gap-relative-only rule (no raw edge) was weaker (58.2% at 4+). G
 
 Applied before tip to Oct 28's logged unders: WSH/CLE and DEN/NO Under 239.5 (edge 5.1, 1.3 after the gap) are
 reclassified "gap_rule" and not counted; PHI/IND Under 239.5 stays (logged at 239.5; at the current 237.5 the edge is 6.8, 3.05 after the gap).
+
+## Entry 20 (2026-10-30): live rule, injury hold (Chad)
+
+When ESPN lists a player Out who played in his team's last game (the projection still counts him), the card
+re-checks the edge with the model's own estimate of every such absence (injuries.py: change in team ARC strength
+times the stage-2 weights). A totals play that falls below edge 4 or 3 after the league-wide gap, or a spread lean
+below 3, is shown as "Held" with the reason and is not logged. It never creates or flips a play. Untested: there
+is no free injury-report history to backtest it.
+
+Replay of the Oct 28 LAL/LAC Over 224.5 loss (final 190): with Luka Doncic alone the adjusted edge is 2.7 (held);
+with all three listed outs (Doncic, Hachimura, Z. Williams; the model rates the last two as raising the total by
+about 1.8) it is 4.5, so the play would still have been logged. The model's absence estimates are modest; this
+rule catches large single absences, not every injury-driven miss.
+
+Record review at this point (entry for context): counted plays 1-2 (avg CLV +2.2); the two new rules have so far
+removed two winning unders (gap rule) and one losing under (cap); spread leans 3-6. Bug fixed: the card could log
+both sides of one game (LAL/LAC spread leans); now one entry per game and market.

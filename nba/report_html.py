@@ -409,11 +409,12 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
         } else if (market === "total") {
           const ou = i === 0 ? "over" : "under";
           model = i === 0 ? num(g.model_total) : "";
-          const pick = (g.total_pick || "").toLowerCase() === ou && ["BET", "WATCH", "CAPPED"].includes(g.total_verdict);
+          const pick = (g.total_pick || "").toLowerCase() === ou && ["BET", "WATCH", "CAPPED", "HELD"].includes(g.total_verdict);
           bookCells = BOOKS.map((bk) => { const x = bl(g, bk); if (!x || x.total == null) return cell(null);
             return cell((i === 0 ? "o" : "u") + num(x.total), x[ou + "_odds"], x[ou + "_link"], pick && g.total_book === bk && x.total === g.total_line); });
           if (pick && g.total_verdict === "BET") edge = g.early ? "<span class='tag'>Early " + sgn(g.total_edge) + "</span>" : "<span class='tag bet'>BET " + sgn(g.total_edge) + "</span>";
           else if (pick && g.total_verdict === "CAPPED") edge = "<span class='tag'>Capped " + sgn(g.total_edge) + "</span>";
+          else if (pick && g.total_verdict === "HELD") edge = "<span class='tag' title='" + esc(g.total_hold) + "'>Held · injury</span>";
           else if (pick) edge = "<span class='tag'>Watch · bet at " + ou[0] + num(playAt(g.total_good_to, ou === "under")) + "</span>";
         } else {
           const p = sd === "home" ? g.p_home_win : 1 - g.p_home_win;
@@ -448,10 +449,10 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 40px; max-width: 8
   }
 
   // Watch list
-  const W = D.games.filter((g) => g.total_verdict === "WATCH");
+  const W = D.games.filter((g) => g.total_verdict === "WATCH" || g.total_verdict === "HELD");
   if (!W.length) $("watch-sec").hidden = true;
   else $("t-watch").innerHTML = "<thead><tr><th>Time</th><th>Game</th><th>Side</th><th class='r'>Now</th><th class='r'>Play at</th><th class='r'>Edge now</th></tr></thead><tbody>" +
-    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + matchupL(g) + (g.total_gap_note ? "<div class='f' style='font-size:12px;white-space:normal'>" + esc(g.total_gap_note) + "</div>" : "") + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
+    W.map((g) => "<tr><td class='m'>" + esc(tip(g)) + "</td><td>" + matchupL(g) + (g.total_gap_note ? "<div class='f' style='font-size:12px;white-space:normal'>" + esc(g.total_gap_note) + "</div>" : "") + (g.total_hold ? "<div class='inj'>" + esc(g.total_hold) + "</div>" : "") + "</td><td class='b'>" + esc(g.total_pick) + "</td><td class='r'>" + num(g.total_line) +
       "</td><td class='r'>" + num(playAt(g.total_good_to, g.total_pick === "Under")) + "</td><td class='r m'>" + sgn(g.total_edge) + "</td></tr>").join("") + "</tbody>";
 
   // Record
